@@ -5,7 +5,7 @@ import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 import clientPromise from "@/lib/mongodb";
 import { findUserByUsername, verifyPassword } from "@/lib/auth";
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
     adapter: MongoDBAdapter(clientPromise),
     providers: [
         CredentialsProvider({
@@ -14,7 +14,7 @@ export const authOptions: NextAuthOptions = {
                 username: { label: "Nom d'utilisateur", type: "text" },
                 password: { label: "Mot de passe", type: "password" },
             },
-            async authorize(credentials, req) {
+            async authorize(credentials) {
                 if (!credentials?.username || !credentials.password) {
                     return null;
                 }
@@ -23,7 +23,7 @@ export const authOptions: NextAuthOptions = {
                 const isValid = await verifyPassword(credentials.password, user.password);
                 if (!isValid) return null;
                 return {
-                    id: user._id.toString(), // Conversion de ObjectId en string
+                    id: user._id.toString(),
                     name: user.username,
                     email: user.email,
                 };
@@ -50,4 +50,5 @@ export const authOptions: NextAuthOptions = {
 };
 
 const handler = NextAuth(authOptions);
+
 export { handler as GET, handler as POST };
