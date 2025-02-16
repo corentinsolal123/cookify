@@ -1,5 +1,6 @@
 export type SiteConfig = typeof siteConfig;
 
+// @ts-ignore
 export const siteConfig = {
     name: "Cookify",
     description: "C'est mon site de recettes hihiiii.",
@@ -17,6 +18,14 @@ export const siteConfig = {
         {
             label: "Profile",
             href: "/profile"
+        },
+        {
+            label: "Recipes",
+            href: "/recipes"
+        },
+        {
+            label: "About",
+            href: "/about"
         },
         {
             label: "Settings",

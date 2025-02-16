@@ -1,4 +1,4 @@
-import { subtitle, title } from "@/lib/primitives";
+import { subtitle, title } from "@/components/global/Primitives";
 
 export default function Home() {
     return (

@@ -23,17 +23,21 @@ export default function RecipeForm({ onSubmit }: RecipeFormProps) {
         const etapesArray = etapes.split(",").map((step) => step.trim());
 
         onSubmit({ titre, description, etapes: etapesArray });
-        // Réinitialiser le formulaire
+
+        // Réinitialisation du formulaire
         setTitre("");
         setDescription("");
         setEtapes("");
     };
 
     return (
-        <Card isBlurred className="border-none bg-background/60 dark:bg-default-100/50 max-w-[610px]" shadow="sm">
-            <CardBody>
-                <form className="recipe-form" onSubmit={handleSubmit}>
-                    <div className="form-group">
+        <div className="flex items-center justify-center p-4">
+            <Card className="w-full max-w-lg  shadow-xl rounded-2xl p-6">
+                <CardBody>
+                    <h2 className="text-2xl font-semibold text-center  mb-6">
+                        Ajouter une recette 🍽️
+                    </h2>
+                    <form onSubmit={handleSubmit} className="space-y-4">
                         <Input
                             label="Nom de la recette"
                             required
@@ -42,8 +46,6 @@ export default function RecipeForm({ onSubmit }: RecipeFormProps) {
                             value={titre}
                             onChange={(e) => setTitre(e.target.value)}
                         />
-                    </div>
-                    <div className="form-group">
                         <Input
                             label="Description"
                             id="description"
@@ -51,22 +53,20 @@ export default function RecipeForm({ onSubmit }: RecipeFormProps) {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
-                    </div>
-                    <div className="form-group">
                         <Input
-                            label={"Étapes (séparées par une virgule) :"}
+                            label="Étapes (séparées par une virgule)"
                             required
                             id="etapes"
                             type="text"
                             value={etapes}
                             onChange={(e) => setEtapes(e.target.value)}
                         />
-                    </div>
-                    <Button type="submit" variant="solid">
-                        Créer la recette
-                    </Button>
-                </form>
-            </CardBody>
-        </Card>
+                        <Button type="submit" variant="solid" className="w-full">
+                            Créer la recette
+                        </Button>
+                    </form>
+                </CardBody>
+            </Card>
+        </div>
     );
 }
