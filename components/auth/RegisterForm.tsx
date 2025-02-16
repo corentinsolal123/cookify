@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input, Button, Card } from "@heroui/react";
+import { Button, Card, Input } from "@heroui/react";
 
 export default function RegisterForm() {
     const [username, setUsername] = useState("");
@@ -16,7 +16,7 @@ export default function RegisterForm() {
         const res = await fetch("/api/auth/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, email, password }),
+            body: JSON.stringify({ username, email, password })
         });
 
         if (res.ok) {

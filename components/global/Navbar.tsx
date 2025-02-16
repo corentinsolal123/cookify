@@ -18,7 +18,7 @@ import clsx from "clsx";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/global/Theme-switch";
 import { GithubIcon, Logo, SearchIcon } from "@/components/global/Icons";
-import AuthStatus from "@/components/auth/AuthStatus"; // Import du composant AuthStatus
+import AuthStatus from "@/components/auth/AuthStatus";
 
 export const Navbar = () => {
     const searchInput = (

@@ -2,8 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import React, { useState } from "react";
-import { Button, Card, CardBody, Input } from "@heroui/react";
-import { Link } from "@heroui/link";
+import { Button, Card, CardBody, Input, Link } from "@heroui/react";
 
 export default function LoginForm() {
     const [username, setUsername] = useState("");

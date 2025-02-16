@@ -2,8 +2,9 @@
 
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { HeroUIProvider } from "@heroui/system";
+import { HeroUIProvider } from "@heroui/react";
 import { useRouter } from "next/navigation";
+import React from "react";
 
 export interface ProvidersProps {
     children: React.ReactNode;

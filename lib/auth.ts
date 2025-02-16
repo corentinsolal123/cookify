@@ -30,7 +30,7 @@ export async function createUser(
     const result = await db.collection("users").insertOne({
         username,
         email,
-        password: hashedPassword,
+        password: hashedPassword
     });
     const newUser = await db.collection("users").findOne({ _id: result.insertedId });
     return newUser;
