@@ -1,0 +1,12 @@
+{
+  "extends": ["config:base"],
+  "dependencyDashboard": true,
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "groupName": "minor updates"
+    }
+  ]
+}
