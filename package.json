@@ -36,7 +36,7 @@
  },
  "devDependencies": {
   "@react-types/shared": "3.27.0",
-  "@types/node": "20.17.19",
+  "@types/node": "22.13.5",
   "@types/react": "18.3.18",
   "@types/react-dom": "18.3.5",
   "autoprefixer": "10.4.20",
