@@ -26,7 +26,7 @@ export default function LoginForm() {
 
     return (
         <div className="flex items-center justify-center ">
-            <Card className="w-full max-w-3xl p-6 space-y-6 shadow-xl rounded-2xl">
+            <Card isBlurred className="w-full max-w-3xl p-6 space-y-6 shadow-xl rounded-2xl">
                 <h2 className="text-2xl font-semibold text-center">
                     Connexion
                 </h2>

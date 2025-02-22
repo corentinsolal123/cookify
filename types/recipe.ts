@@ -1,15 +1,20 @@
 export interface IIngredient {
-    nom: string;
-    quantiteParPortion: number;
+    name: string;
+    quantity: number;
     unite: string;
 }
 
 export interface IRecipe {
+    creator: any;
     _id: string;
-    titre: string;
+    image: string;
+    name: string;
+    difficulty: string;
+    prepTime: number;
+    cookTime: number;
     description?: string;
     calories?: number;
-    etapes: string[];
+    steps: string[];
     ingredients: IIngredient[];
     tags: string[];
 }

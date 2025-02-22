@@ -22,7 +22,7 @@ export default function RecipeList({ recipes }: RecipeListProps) {
                         shadow="sm"
                     >
                         <CardHeader className="flex flex-col gap-1">
-                            <h3 className="text-xl font-bold">{recipe.titre}</h3>
+                            <h3 className="text-xl font-bold">{recipe.name}</h3>
                         </CardHeader>
                         <Divider className="my-4" />
                         <CardBody>
@@ -34,7 +34,7 @@ export default function RecipeList({ recipes }: RecipeListProps) {
                                 <p className="mb-2 italic text-gray-500">Aucune description</p>
                             )}
                             <p className="text-sm text-gray-600">
-                                <strong>Étapes :</strong> {recipe.etapes.join(", ")}
+                                <strong>Étapes :</strong> {recipe.steps.join(", ")}
                             </p>
                         </CardBody>
                     </Card>

@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 
 import RecipeForm from "@/components/recipes/RecipeForm";
 import RecipeList from "@/components/recipes/RecipeList";
-import { IRecipe } from "@/types/recipe";
-import { createRecipeAPI, fetchRecipesAPI } from "@/lib/api";
+import { IIngredient, IRecipe } from "@/types/recipe";
+import { createRecipeAPI, fetchIngredientsAPI, fetchRecipesAPI } from "@/lib/api";
 
 export default function RecipesPage() {
     const [recipes, setRecipes] = useState<IRecipe[]>([]);
+    const [ingredients, setIngredients] = useState<IIngredient[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -23,24 +24,36 @@ export default function RecipesPage() {
             setLoading(false);
         }
     };
+    const loadIngedients = async () => {
+        try {
+            const data = await fetchIngredientsAPI();
+
+            setIngredients(data);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         loadRecipes();
+        loadIngedients();
     }, []);
 
-    const handleCreateRecipe = async (data: {
-        titre: string;
-        description: string;
-        etapes: string[];
-    }) => {
+    const handleCreateRecipe = async (data: IRecipe) => {
         try {
             // On crée une nouvelle recette en utilisant l'API
             await createRecipeAPI({
-                titre: data.titre,
-                description: data.description,
-                etapes: data.etapes,
-                ingredients: [],
-                tags: []
+                name: data.name,
+                steps: data.steps,
+                ingredients: data.ingredients,
+                tags: [],
+                cookTime: data.cookTime,
+                creator: undefined,
+                difficulty: data.difficulty,
+                image: data.image,
+                prepTime: data.prepTime
             });
             loadRecipes();
         } catch (err: any) {
@@ -53,7 +66,7 @@ export default function RecipesPage() {
             <h1 className="page-title">Cookify - Test des Recettes</h1>
 
             <section className="form-section">
-                <RecipeForm onSubmit={handleCreateRecipe} />
+                <RecipeForm onSubmit={handleCreateRecipe} existingIngredients={ingredients} />
             </section>
 
             <section className="list-section">

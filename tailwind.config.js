@@ -9,6 +9,12 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        warning: {
+          DEFAULT: "#FF705B", // Couleur principale
+          light: "#FFB457", // Variation plus claire
+        },
+      },
       fontFamily: {
         sans: ["var(--font-sans)"],
         mono: ["var(--font-mono)"],

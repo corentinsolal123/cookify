@@ -31,8 +31,12 @@ export default function AuthStatus() {
             <Button as={Link} color="default" href="/login" variant="solid">
                 Connexion
             </Button>
-            <Button as={Link} color="warning" href="/register" variant="solid">
-                Inscription
+            <Button
+                as={Link}
+                href="/register"
+                variant="solid"
+                className="bg-warning-light text-white hover:bg-warning"
+            >                Inscription
             </Button>
         </div>
     );

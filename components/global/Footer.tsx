@@ -11,8 +11,8 @@ export const Footer = () => {
                 href="#"
                 title="heroui.com homepage"
             >
-                <span className="text-default-600">Powered by</span>
-                <p className="text-primary">CSLEnterprise</p>
+                <span className="text-default-600">Powered by &nbsp;</span>
+                <p className="text-primary">Co&Co² Enterprise</p>
             </Link>
         </footer>);
 };

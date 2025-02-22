@@ -1,74 +1,75 @@
 "use client";
 
-import { Card, CardBody, CardHeader, Divider } from "@heroui/react";
+import { Avatar, Badge, Card, CardBody, CardHeader } from "@heroui/react";
 import { IRecipe } from "@/types/recipe";
+import { ReactElement } from "react";
 
 interface RecipeDetailProps {
     recipe: IRecipe;
 }
 
-export default function RecipeDetail({ recipe }: RecipeDetailProps) {
+export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElement{
     return (
-        <div className="container">
-            <Card
-                isBlurred
-                shadow="sm"
-                className="recipe-card border-none bg-background/60 dark:bg-default-100/50"
-            >
-                <CardHeader>
-                    <h1 className="title">{recipe.titre}</h1>
-                </CardHeader>
-                <Divider className="my-4" />
-                <CardBody>
-                    {recipe.description && <p className="description">{recipe.description}</p>}
-                    <h2 className="sub-title">Étapes :</h2>
-                    <ul className="steps">
-                        {recipe.etapes.map((step, index) => (
-                            <li key={index}>{step}</li>
-                        ))}
-                    </ul>
-                    {/* Vous pouvez ajouter ici l'affichage des ingrédients, tags, etc. */}
-                </CardBody>
-            </Card>
+        <div className="container mx-auto p-6 grid grid-cols-12 gap-6">
+            {/* Image et infos pratiques */}
+            <div className="col-span-3 space-y-4">
+                <Card>
+                    <CardBody className="p-4">
+                        <img
+                            src={recipe.image || "/placeholder.png"}
+                            alt={recipe.name}
+                            className="w-full h-48 object-cover rounded-lg"
+                        />
+                    </CardBody>
+                </Card>
+                <Card>
+                    <CardBody className="p-4 space-y-2">
+                        <Badge>{recipe.difficulty}</Badge>
+                        <p>⏱ Préparation : {recipe.prepTime} min</p>
+                        <p>🔥 Cuisson : {recipe.cookTime} min</p>
+                        <p>⚡ Calories : {recipe.calories} kcal</p>
+                        <div className="flex items-center space-x-2">
+                            <Avatar size="sm" />
+                            <span>Par {recipe.creator}</span>
+                        </div>
+                    </CardBody>
+                </Card>
+            </div>
 
-            <style jsx>{`
-                .container {
-                    max-width: 800px;
-                    margin: 2rem auto;
-                    padding: 1rem;
-                    font-family: sans-serif;
-                }
+            {/* Étapes de préparation */}
+            <div className="col-span-6">
+                <Card>
+                    <CardHeader>
+                        <h2 className="text-xl font-bold">Étapes de préparation</h2>
+                    </CardHeader>
+                    <CardBody>
+                        <ol className="list-decimal list-inside space-y-2">
+                            {recipe.steps.map((step, index) => (
+                                <li key={index}>{step}</li>
+                            ))}
+                        </ol>
+                    </CardBody>
+                </Card>
+            </div>
 
-                .recipe-card {
-                    background: var(--background, #fff);
-                }
-
-                .title {
-                    font-size: 2rem;
-                    font-weight: bold;
-                }
-
-                .description {
-                    margin-bottom: 1rem;
-                    font-size: 1.1rem;
-                    color: #555;
-                }
-
-                .sub-title {
-                    margin-top: 1.5rem;
-                    font-size: 1.5rem;
-                    font-weight: 600;
-                }
-
-                .steps {
-                    list-style: disc;
-                    padding-left: 1.5rem;
-                }
-
-                .steps li {
-                    margin-bottom: 0.5rem;
-                }
-            `}</style>
+            {/* Liste des ingrédients */}
+            <div className="col-span-3">
+                <Card>
+                    <CardHeader>
+                        <h2 className="text-xl font-bold">Ingrédients</h2>
+                    </CardHeader>
+                    <CardBody>
+                        <ul className="space-y-2">
+                            {recipe.ingredients.map((ingredient, index) => (
+                                <li key={index} className="flex justify-between">
+                                    <span>{ingredient.name}</span>
+                                    <span>{ingredient.quantity}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </CardBody>
+                </Card>
+            </div>
         </div>
     );
 }

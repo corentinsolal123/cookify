@@ -1,72 +1,129 @@
 "use client";
 
-import { Button, Card, CardBody, Input } from "@heroui/react";
-import React, { useState } from "react";
+import { Avatar, Button, Card, CardBody, CardHeader, Input, Select, SelectItem } from "@heroui/react";
+import { useState } from "react";
+import { IIngredient, IRecipe } from "@/types/recipe";
 
-interface RecipeFormData {
-    titre: string;
-    description: string;
-    etapes: string[];
-}
 
 interface RecipeFormProps {
-    onSubmit: (data: RecipeFormData) => void;
+    onSubmit: (data: IRecipe) => void;
+    existingIngredients: any[];
 }
 
-export default function RecipeForm({ onSubmit }: RecipeFormProps) {
-    const [titre, setTitre] = useState("");
-    const [description, setDescription] = useState("");
-    const [etapes, setEtapes] = useState("");
+export default function RecipeForm({ onSubmit, existingIngredients }: RecipeFormProps) {
+    const [steps, setSteps] = useState<string[]>([""]);
+    const [ingredients, setIngredients] = useState<IIngredient[]>([{ name: "", quantity: 0, unite: "" }]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const etapesArray = etapes.split(",").map((step) => step.trim());
+    const addStep = () => setSteps([...steps, ""]);
+    const updateStep = (index: number, value: string) => {
+        const newSteps = [...steps];
+        newSteps[index] = value;
+        setSteps(newSteps);
+    };
+    const removeStep = (index: number) => {
+        setSteps(steps.filter((_, i) => i !== index));
+    };
 
-        onSubmit({ titre, description, etapes: etapesArray });
-
-        // Réinitialisation du formulaire
-        setTitre("");
-        setDescription("");
-        setEtapes("");
+    const addIngredient = () => setIngredients([...ingredients, { name: "", quantity: 0, unite: "" }]);
+    const updateIngredient = (index: number, field: keyof IIngredient, value: string | number) => {
+        const newIngredients = [...ingredients];
+        newIngredients[index] = { ...newIngredients[index], [field]: value };
+        setIngredients(newIngredients);
+    };
+    const removeIngredient = (index: number) => {
+        setIngredients(ingredients.filter((_, i) => i !== index));
     };
 
     return (
-        <div className="flex items-center justify-center p-4">
-            <Card className="w-full max-w-lg  shadow-xl rounded-2xl p-6">
-                <CardBody>
-                    <h2 className="text-2xl font-semibold text-center  mb-6">
-                        Ajouter une recette 🍽️
-                    </h2>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <Input
-                            label="Nom de la recette"
-                            required
-                            id="titre"
-                            type="text"
-                            value={titre}
-                            onChange={(e) => setTitre(e.target.value)}
-                        />
-                        <Input
-                            label="Description"
-                            id="description"
-                            type="text"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                        />
-                        <Input
-                            label="Étapes (séparées par une virgule)"
-                            required
-                            id="etapes"
-                            type="text"
-                            value={etapes}
-                            onChange={(e) => setEtapes(e.target.value)}
-                        />
-                        <Button type="submit" variant="solid" className="w-full">
-                            Créer la recette
-                        </Button>
-                    </form>
-                </CardBody>
-            </Card>
-        </div>
+        <form className="container mx-auto p-6 grid grid-cols-12 gap-6">
+            {/* Image et infos pratiques */}
+            <div className="col-span-3 space-y-4">
+                <Card>
+                    <CardBody className="p-4">
+                        <Input type="file" accept="image/*" className="w-full" />
+                    </CardBody>
+                </Card>
+                <Card>
+                    <CardBody className="p-4 space-y-2">
+                        <Input placeholder="Difficulté" />
+                        <Input type="number" placeholder="⏱ Préparation (min)" />
+                        <Input type="number" placeholder="🔥 Cuisson (min)" />
+                        <Input type="number" placeholder="⚡ Calories" />
+                        <div className="flex items-center space-x-2">
+                            <Avatar size="sm" />
+                            <Input placeholder="Créateur" />
+                        </div>
+                    </CardBody>
+                </Card>
+            </div>
+
+            {/* Étapes de préparation */}
+            <div className="col-span-6">
+                <Card>
+                    <CardHeader>
+                        <h2 className="text-xl font-bold">Étapes de préparation</h2>
+                    </CardHeader>
+                    <CardBody>
+                        {steps.map((step, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                                <Input
+                                    placeholder={`Étape ${index + 1}`}
+                                    value={step}
+                                    onChange={(e) => updateStep(index, e.target.value)}
+                                />
+                                <Button onPress={() => removeStep(index)} type="button">❌</Button>
+                            </div>
+                        ))}
+                        <Button onPress={addStep} type="button">Ajouter une étape</Button>
+                    </CardBody>
+                </Card>
+            </div>
+
+            {/* Liste des ingrédients */}
+            <div className="col-span-3">
+                <Card>
+                    <CardHeader>
+                        <h2 className="text-xl font-bold">Ingrédients</h2>
+                    </CardHeader>
+                    <CardBody>
+                        {ingredients.map((ingredient, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                                <Input
+                                    placeholder="Nom"
+                                    value={ingredient.name}
+                                    onChange={(e) => updateIngredient(index, "name", e.target.value)}
+                                    list="ingredient-options"
+                                />
+                                <Input
+                                    type="number"
+                                    placeholder="Quantité"
+                                    value={ingredient.quantity.toString()}
+                                    onChange={(e) => updateIngredient(index, "quantity", Number(e.target.value))}
+                                />
+                                <Select
+                                    value={ingredient.unite}
+                                    onChange={(e) => updateIngredient(index, "unite", e.target.value)}
+                                >
+                                    <SelectItem value="g">g</SelectItem>
+                                    <SelectItem value="ml">ml</SelectItem>
+                                    <SelectItem value="pcs">pcs</SelectItem>
+                                </Select>
+                                <Button onPress={() => removeIngredient(index)} type="button">❌</Button>
+                            </div>
+                        ))}
+                        <datalist id="ingredient-options">
+                            {existingIngredients.map((ing, index) => (
+                                <SelectItem key={index} value={ing.name} />
+                            ))}
+                        </datalist>
+                        <Button onPress={addIngredient} type="button">Ajouter un ingrédient</Button>
+                    </CardBody>
+                </Card>
+            </div>
+
+            <div className="col-span-12 flex justify-end">
+                <Button type="submit">Créer la recette</Button>
+            </div>
+        </form>
     );
 }
