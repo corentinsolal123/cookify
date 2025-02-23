@@ -4,17 +4,34 @@
             <stop offset="0%" stop-color="#FF705B" />
             <stop offset="100%" stop-color="#FFB457" />
         </linearGradient>
+        <filter id="softBlur">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="20" />
+        </filter>
+        <filter id="darkenFilter">
+            <feComponentTransfer>
+                <feFuncR type="linear" slope="0.8"/>
+                <feFuncG type="linear" slope="0.8"/>
+                <feFuncB type="linear" slope="0.8"/>
+            </feComponentTransfer>
+        </filter>
     </defs>
 
-    <!-- Courbes fluides -->
-    <path d="M0,300 Q400,450 800,300 T1440,300" stroke="url(#gradient)" stroke-width="3" fill="transparent" />
-    <path d="M0,500 Q300,650 700,500 T1440,500" stroke="url(#gradient)" stroke-width="2" fill="transparent" />
-    <path d="M0,700 Q500,850 1000,700 T1440,700" stroke="url(#gradient)" stroke-width="1.5" fill="transparent" />
+    <g filter="url(#darkenFilter)">
+        <!-- Fond en dégradé -->
+        <rect width="1440" height="900" fill="url(#gradient)" />
 
-    <!-- Cercles stylisés -->
-    <circle cx="200" cy="200" r="5" fill="#FF705B" />
-    <circle cx="1200" cy="400" r="6" fill="#FFB457" />
-    <circle cx="600" cy="600" r="4" fill="#FF705B" />
+        <!-- Formes abstraites floutées en bas avec remplissage sombre -->
+        <g filter="url(#softBlur)">
+            <path d="M200,300 Q500,100 800,300 T1400,300 L1440,900 L0,900 Z" fill="rgba(0,0,0,0.2)" />
+            <path d="M0,500 Q400,350 800,500 T1440,500 L1440,900 L0,900 Z" fill="rgba(0,0,0,0.2)" />
+            <path d="M400,700 Q700,550 1000,700 T1440,700 L1440,900 L0,900 Z" fill="rgba(0,0,0,0.2)" />
+        </g>
 
+        <!-- Contours nets pour structurer les formes -->
+        <g stroke="white" stroke-width="1.5" opacity="0.6">
+            <path d="M200,300 Q500,100 800,300 T1400,300" />
+            <path d="M0,500 Q400,350 800,500 T1440,500" />
+            <path d="M400,700 Q700,550 1000,700 T1440,700" />
+        </g>
+    </g>
 </svg>
-

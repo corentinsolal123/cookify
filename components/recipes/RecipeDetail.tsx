@@ -1,11 +1,11 @@
 "use client";
 
 import { Avatar, Badge, Card, CardBody, CardHeader } from "@heroui/react";
-import { IRecipe } from "@/types/recipe";
+import { RecipeData } from "@/types/recipe";
 import { ReactElement } from "react";
 
 interface RecipeDetailProps {
-    recipe: IRecipe;
+    recipe: RecipeData;
 }
 
 export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElement{
@@ -63,7 +63,7 @@ export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElemen
                             {recipe.ingredients.map((ingredient, index) => (
                                 <li key={index} className="flex justify-between">
                                     <span>{ingredient.name}</span>
-                                    <span>{ingredient.quantity}</span>
+                                    <span>{ingredient.quantityPerServing}</span>
                                 </li>
                             ))}
                         </ul>

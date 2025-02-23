@@ -7,6 +7,7 @@ import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/global/Navbar";
 import { Footer } from "@/components/global/Footer";
+import React from "react";
 
 export const metadata: Metadata = {
     title: {
@@ -35,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
             <div className="relative flex flex-col h-screen">
                 <Navbar />
-                <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow flex items-center justify-center">
+                <main className="container mx-auto pt-16 px-6 flex-grow flex items-center justify-center">
                     {children}
                 </main>
 

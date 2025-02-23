@@ -1,30 +1,39 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IRecipe extends Document {
-    titre: string;
-    description?: string;
-    calories?: number;
-    etapes: string[];
-    ingredients: { nom: string; quantiteParPortion: number; unite: string }[];
-    tags: string[];
+    image?: string;
+    tags?: string[];
+
+    name: string;
+    description: string;
+    difficulty: string;
+    prepTime: number;
+    cookTime: number;
+    calories: number;
+    creator: string;
+    steps: string[];
+    ingredients: mongoose.Types.ObjectId[];
 }
 
 const RecipeSchema: Schema<IRecipe> = new Schema(
     {
-        titre: { type: String, required: true },
+        name: { type: String, required: true },
         description: { type: String },
+        difficulty: { type: String, required: true },
+        prepTime: { type: Number, required: true },
+        cookTime: { type: Number, required: true },
         calories: { type: Number },
-        etapes: { type: [String], required: true },
+        creator: { type: String, required: true },
+        image: { type: String },
+        steps: { type: [String], required: true },
         ingredients: [
-            {
-                nom: { type: String, required: true },
-                quantiteParPortion: { type: Number, required: true },
-                unite: { type: String, required: true },
-            }
+            { type: mongoose.Schema.Types.ObjectId, ref: "Ingredient", required: true }
         ],
-        tags: { type: [String], default: [] },
+        tags: { type: [String], default: [] }
     },
-    { collection: "cookifyDB" } // Spécifie explicitement le nom de la collection
+    {
+        timestamps: true
+    }
 );
 
 export default mongoose.models.Recipe || mongoose.model<IRecipe>("Recipe", RecipeSchema);

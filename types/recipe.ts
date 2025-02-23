@@ -1,20 +1,18 @@
-export interface IIngredient {
-    name: string;
-    quantity: number;
-    unite: string;
-}
+import { IngredientData } from "@/types/ingredient";
 
-export interface IRecipe {
-    creator: any;
-    _id: string;
-    image: string;
+export interface RecipeData {
+    _id?: string; // champ optionnel
+    image?: string;
+    tags?: string[];
     name: string;
+    description: string;
     difficulty: string;
     prepTime: number;
     cookTime: number;
-    description?: string;
-    calories?: number;
+    calories: number;
+    creator: string;
     steps: string[];
-    ingredients: IIngredient[];
-    tags: string[];
+    ingredients: IngredientData[];
 }
+
+
