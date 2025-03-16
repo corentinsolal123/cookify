@@ -1,25 +1,17 @@
 "use client";
 
 import { Avatar, Button, Card, CardBody, CardHeader, Input, Select, SelectItem } from "@heroui/react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { RecipeData } from "@/types/recipe";
 import { IngredientData } from "@/types/ingredient";
 
 interface RecipeFormProps {
     onSubmit: (data: RecipeData) => void;
-    existingIngredients: any[];
-    // On ajoute ces deux props :
     initialData: RecipeData;
     isNew: boolean;
 }
 
-export default function RecipeForm({
-                                       onSubmit,
-                                       existingIngredients,
-                                       initialData,
-                                       isNew
-                                   }: RecipeFormProps) {
-    // On initialise les états avec les données reçues
+export default function RecipeForm({ onSubmit, initialData, isNew }: RecipeFormProps) {
     const [name, setName] = useState(initialData.name || "");
     const [description, setDescription] = useState(initialData.description || "");
     const [difficulty, setDifficulty] = useState(initialData.difficulty || "");
@@ -27,195 +19,169 @@ export default function RecipeForm({
     const [cookTime, setCookTime] = useState(initialData.cookTime || 0);
     const [calories, setCalories] = useState(initialData.calories || 0);
     const [creator, setCreator] = useState(initialData.creator || "");
-
-    // Steps
     const [steps, setSteps] = useState<string[]>(initialData.steps || [""]);
+    const [ingredients, setIngredients] = useState<IngredientData[]>(initialData.ingredients || []);
 
-    // Ingrédients
-    const [ingredients, setIngredients] = useState<IngredientData[]>(
-        initialData.ingredients || [{ name: "", quantityPerServing: 0, unit: "" }]
-    );
+    // 🔍 Recherche d’ingrédients
+    const [query, setQuery] = useState("");
+    const [searchResults, setSearchResults] = useState<IngredientData[]>([]);
+    const [loading, setLoading] = useState(false);
 
-    // Fonctions pour gérer les steps
-    const addStep = () => setSteps([...steps, ""]);
-    const updateStep = (index: number, value: string) => {
-        const newSteps = [...steps];
-        newSteps[index] = value;
-        setSteps(newSteps);
+    const searchIngredients = async () => {
+        if (!query) return;
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/ingredients?q=${query}`);
+            const data = await res.json();
+            if (res.ok) {
+                setSearchResults(data);
+            } else {
+                setSearchResults([]);
+                console.error(data.error);
+            }
+        } catch (error) {
+            console.error("Erreur de recherche :", error);
+        }
+        setLoading(false);
     };
-    const removeStep = (index: number) => {
-        setSteps(steps.filter((_, i) => i !== index));
+
+    // ➕ Ajouter un ingrédient
+    const addIngredient = (ingredient: IngredientData) => {
+        setIngredients([
+            ...ingredients,
+            { name: ingredient.name, calories: ingredient.calories, quantityPerServing: 100, unit: "g" }
+        ]);
+        setQuery("");
+        setSearchResults([]);
     };
 
-    // Fonctions pour gérer les ingrédients
-    const addIngredient = () =>
-        setIngredients([...ingredients, { name: "", quantityPerServing: 0, unit: "" }]);
-    const updateIngredient = (
-        index: number,
-        field: keyof IngredientData,
-        value: string | number
-    ) => {
+    // 🔄 Mettre à jour un ingrédient
+    const updateIngredient = (index: number, field: keyof IngredientData, value: string | number) => {
         const newIngredients = [...ingredients];
         newIngredients[index] = { ...newIngredients[index], [field]: value };
         setIngredients(newIngredients);
     };
+
+    // ❌ Supprimer un ingrédient
     const removeIngredient = (index: number) => {
         setIngredients(ingredients.filter((_, i) => i !== index));
     };
 
-    // Soumission du formulaire
+    // 📝 Soumettre le formulaire
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-
-        // On reconstitue l’objet complet
-        const recipeData: RecipeData = {
-            name,
-            description,
-            difficulty,
-            prepTime,
-            cookTime,
-            calories,
-            creator,
-            steps,
-            ingredients
-            // image: ... (à gérer si besoin)
-        };
-
+        const recipeData: RecipeData = { name, description, difficulty, prepTime, cookTime, calories, creator, steps, ingredients };
         onSubmit(recipeData);
     }
 
     return (
-        <form onSubmit={handleSubmit} className="container mx-auto p-6 grid grid-cols-12 gap-3">
-            {/* Image et infos pratiques */}
-            <div className="col-span-3 space-y-4">
-                <Card>
-                    <CardBody className="p-4">
-                        <Input type="file" accept="image/*" className="w-full" />
-                    </CardBody>
-                </Card>
-                <Card>
-                    <CardBody className="p-4 space-y-2">
-                        <Input
-                            label="Difficulté"
-                            labelPlacement="outside"
-                            placeholder="Difficulté"
-                            value={difficulty}
-                            onChange={(e) => setDifficulty(e.target.value)}
-                        />
-                        <Input
-                            label={"Temps de préparation (min)"}
-                            labelPlacement="outside"
-                            type="number"
-                            placeholder="⏱ Préparation (min)"
-                            value={prepTime.toString()}
-                            onChange={(e) => setPrepTime(Number(e.target.value))}
-                        />
-                        <Input
-                            label={"temps de cuisson (min)"}
-                            labelPlacement="outside"
-                            type="number"
-                            placeholder="🔥 Cuisson (min)"
-                            value={cookTime.toString()}
-                            onChange={(e) => setCookTime(Number(e.target.value))}
-                        />
-                        <Input
-                            label={"Nb de calories"}
-                            type="number"
-                            placeholder="⚡ Calories"
-                            value={calories.toString()}
-                            onChange={(e) => setCalories(Number(e.target.value))}
-                        />
-                        <div className="flex items-center space-x-2">
-                            <Avatar size="sm" />
-                            <Input
-                                placeholder="Créateur"
-                                value={creator}
-                                onChange={(e) => setCreator(e.target.value)}
-                            />
-                        </div>
-                    </CardBody>
-                </Card>
-            </div>
+        <Card isBlurred>
+            <CardBody>
+                <form onSubmit={handleSubmit} className="container mx-auto p-3 grid grid-cols-12 gap-3">
 
-            {/* Étapes de préparation */}
-            <div className="col-span-6">
-                <Card>
-                    <CardHeader>
-                        <h2 className="text-xl font-bold">Étapes de préparation</h2>
-                    </CardHeader>
-                    <CardBody>
-                        {steps.map((step, index) => (
-                            <div key={index} className="flex items-center space-x-2 mb-2">
-                                <Input
-                                    placeholder={`Étape ${index + 1}`}
-                                    value={step}
-                                    onChange={(e) => updateStep(index, e.target.value)}
-                                />
-                                <Button onPress={() => removeStep(index)} type="button">
-                                    ❌
-                                </Button>
-                            </div>
-                        ))}
-                        <Button onPress={addStep} type="button">
-                            Ajouter une étape
-                        </Button>
-                    </CardBody>
-                </Card>
-            </div>
+                    {/* 📌 Nom & Infos principales */}
+                    <div className="col-span-3 space-y-5">
+                        <Card>
+                            <CardBody className="p-4 space-y-4">
+                                <Input type="file" accept="image/*" className="w-full" />
+                                <Input type="text" label="Nom de la recette" value={name}
+                                       onChange={(e) => setName(e.target.value)} />
+                            </CardBody>
+                        </Card>
+                        <Card className="space-y-2">
+                            <CardBody className="p-4 space-y-4">
+                                <Input label="Difficulté" placeholder="Difficulté"
+                                       value={difficulty} onChange={(e) => setDifficulty(e.target.value)} />
+                                <Input label="Préparation (min)" type="number" value={prepTime.toString()}
+                                       onChange={(e) => setPrepTime(Number(e.target.value))} />
+                                <Input label="Cuisson (min)" type="number" value={cookTime.toString()}
+                                       onChange={(e) => setCookTime(Number(e.target.value))} />
+                                <Input label="Calories" type="number" value={calories.toString()}
+                                       onChange={(e) => setCalories(Number(e.target.value))} />
+                                <div className="flex items-center space-x-2">
+                                    <Avatar size="sm" />
+                                    <Input placeholder="Créateur" value={creator}
+                                           onChange={(e) => setCreator(e.target.value)} />
+                                </div>
+                            </CardBody>
+                        </Card>
+                    </div>
 
-            {/* Liste des ingrédients */}
-            <div className="col-span-3">
-                <Card>
-                    <CardHeader>
-                        <h2 className="text-xl font-bold">Ingrédients</h2>
-                    </CardHeader>
-                    <CardBody>
-                        {ingredients.map((ingredient, index) => (
-                            <div key={index} className="flex items-center space-x-2 mb-2">
-                                <Input
-                                    placeholder="Nom"
-                                    value={ingredient.name}
-                                    onChange={(e) => updateIngredient(index, "name", e.target.value)}
-                                    list="ingredient-options"
-                                />
-                                <Input
-                                    type="number"
-                                    placeholder="Quantité"
-                                    value={ingredient.quantityPerServing.toString()}
-                                    onChange={(e) =>
-                                        updateIngredient(index, "quantityPerServing", Number(e.target.value))
-                                    }
-                                />
-                                <Select
-                                    value={ingredient.unit}
-                                    onChange={(e) => updateIngredient(index, "unit", e.target.value)}
-                                >
-                                    <SelectItem key="g">g</SelectItem>
-                                    <SelectItem key="ml">ml</SelectItem>
-                                    <SelectItem key="pcs">pcs</SelectItem>
-                                </Select>
-                                <Button onPress={() => removeIngredient(index)} type="button">
-                                    ❌
-                                </Button>
-                            </div>
-                        ))}
-                        <datalist id="ingredient-options">
-                            {existingIngredients.map((ing, idx) => (
-                                <option key={idx} value={ing.name} />
-                            ))}
-                        </datalist>
-                        <Button onPress={addIngredient} type="button">
-                            Ajouter un ingrédient
-                        </Button>
-                    </CardBody>
-                </Card>
-            </div>
+                    {/* 📜 Étapes de préparation */}
+                    <div className="col-span-6">
+                        <Card>
+                            <CardHeader>
+                                <h2 className="text-xl font-bold">Étapes de préparation</h2>
+                            </CardHeader>
+                            <CardBody>
+                                {steps.map((step, index) => (
+                                    <div key={index} className="flex items-center space-x-2 mb-2">
+                                        <Input placeholder={`Étape ${index + 1}`} value={step}
+                                               onChange={(e) => {
+                                                   const newSteps = [...steps];
+                                                   newSteps[index] = e.target.value;
+                                                   setSteps(newSteps);
+                                               }} />
+                                        <Button onPress={() => setSteps(steps.filter((_, i) => i !== index))}>❌</Button>
+                                    </div>
+                                ))}
+                                <Button onPress={() => setSteps([...steps, ""])}>Ajouter une étape</Button>
+                            </CardBody>
+                        </Card>
+                    </div>
 
-            <div className="col-span-12 flex justify-end">
-                <Button type="submit">
-                    {isNew ? "Créer la recette" : "Enregistrer les modifications"}
-                </Button>
-            </div>
-        </form>
+                    {/* 🔍 Recherche & liste des ingrédients */}
+                    <div className="col-span-3">
+                        <Card>
+                            <CardHeader>
+                                <h2 className="text-xl font-bold">Ingrédients</h2>
+                            </CardHeader>
+                            <CardBody>
+
+                                {/* Champ de recherche */}
+                                <Input placeholder="Rechercher un ingrédient..."
+                                       value={query} onChange={(e) => setQuery(e.target.value)} />
+                                <Button onPress={searchIngredients} className="mt-2">🔍 Rechercher</Button>
+
+                                {/* Résultats de la recherche */}
+                                {loading && <p>Chargement...</p>}
+                                {searchResults.length > 0 && (
+                                    <div className=" p-2 rounded-md mt-2">
+                                        {searchResults.map((ingredient, index) => (
+                                            <div key={index} className="flex justify-between p-2 border-b">
+                                                <span>{ingredient.name} - {ingredient.calories} kcal</span>
+                                                <Button onPress={() => addIngredient(ingredient)}>➕ Ajouter</Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Liste des ingrédients sélectionnés */}
+                                {ingredients.map((ingredient, index) => (
+                                    <div key={index} className="flex items-center space-x-2 mb-2">
+                                        <span className="w-1/3">{ingredient.name}</span>
+                                        <Input type="number" placeholder="Quantité"
+                                               value={ingredient.quantityPerServing.toString()}
+                                               onChange={(e) => updateIngredient(index, "quantityPerServing", Number(e.target.value))} />
+                                        <Select value={ingredient.unit}
+                                                onChange={(e) => updateIngredient(index, "unit", e.target.value)}>
+                                            <SelectItem key="g">g</SelectItem>
+                                            <SelectItem key="ml">ml</SelectItem>
+                                            <SelectItem key="pcs">pcs</SelectItem>
+                                        </Select>
+                                        <Button onPress={() => removeIngredient(index)}>❌</Button>
+                                    </div>
+                                ))}
+                            </CardBody>
+                        </Card>
+                    </div>
+
+                    {/* ✅ Validation */}
+                    <div className="col-span-12 flex justify-end">
+                        <Button type="submit">{isNew ? "Créer la recette" : "Enregistrer"}</Button>
+                    </div>
+                </form>
+            </CardBody>
+        </Card>
     );
 }

@@ -4,6 +4,7 @@ export interface IIngredient extends Document {
     name: string;
     quantityPerServing: number;
     unit: string;
+    calories: number
 }
 
 const IngredientSchema: Schema<IIngredient> = new Schema(

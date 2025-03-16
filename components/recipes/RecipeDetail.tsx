@@ -14,9 +14,10 @@ export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElemen
             {/* Image et infos pratiques */}
             <div className="col-span-3 space-y-4">
                 <Card>
-                    <CardBody className="p-4">
+                    <CardBody className="p-4 space-y-2">
+                        <h2>Nom: {recipe.name}</h2>
                         <img
-                            src={recipe.image || "/placeholder.png"}
+                            src={recipe.image || "https://placehold.co/400x400.png"}
                             alt={recipe.name}
                             className="w-full h-48 object-cover rounded-lg"
                         />

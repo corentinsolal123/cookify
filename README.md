@@ -1,53 +1,103 @@
-# Next.js & HeroUI Template
+# Plan de développement de l'application de gestion de recettes
 
-This is a template for creating applications using Next.js 14 (app directory) and HeroUI (v2).
+## 1. Introduction
+L'objectif est de développer une application web de gestion de recettes de cuisine avec calcul automatique des calories et génération de listes de courses. Cette application sera basée sur **Next.js** et **MongoDB Atlas**, avec des intégrations d'API externes pour les données nutritionnelles et des solutions d'authentification.
 
-[Try it on CodeSandbox](https://githubbox.com/heroui-inc/heroui/next-app-template)
+---
 
-## Technologies Used
+## 2. Fonctionnalités principales
 
-- [Next.js 14](https://nextjs.org/docs/getting-started)
-- [HeroUI v2](https://heroui.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Tailwind Variants](https://tailwind-variants.org)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Framer Motion](https://www.framer.com/motion/)
-- [next-themes](https://github.com/pacocoursey/next-themes)
+### 2.1. Gestion des recettes
+- Création, modification, visualisation et suppression de recettes.
+- Chaque recette contient :
+    - Titre, description, catégories/tags.
+    - Liste des ingrédients avec quantités.
+    - Étapes de préparation.
+    - Image illustrative.
+- Les recettes seront stockées en base de données et liées à l'utilisateur qui les a créées.
 
-## How to Use
+### 2.2. Comptabilisation des calories
+- Calcul automatique des calories à partir des ingrédients.
+- Intégration avec **OpenFoodFacts**, **Edamam** ou **USDA API**.
+- Mise en cache des valeurs nutritionnelles pour optimiser les performances.
 
-### Use the template with create-next-app
+### 2.3. Authentification des utilisateurs
+- Inscription et connexion avec **NextAuth.js** ou **Firebase Auth**.
+- Support des fournisseurs OAuth (Google, GitHub) et e-mail/password.
+- Protection des routes sensibles pour restreindre l'accès aux utilisateurs authentifiés.
 
-To create a new project based on this template using `create-next-app`, run the following command:
+### 2.4. Génération de liste de courses
+- Possibilité d'ajouter plusieurs recettes à un **panier**.
+- Conversion des quantités d'ingrédients en fonction du nombre de portions souhaitées.
+- Liste de courses exportable et imprimable.
 
-```bash
-npx create-next-app -e https://github.com/heroui-inc/next-app-template
-```
+### 2.5. Génération de menus équilibrés
+- L'utilisateur définit un **objectif calorique quotidien**.
+- Génération d'un menu hebdomadaire équilibré (petit-déjeuner, déjeuner, dîner).
+- Respect des régimes particuliers (végétarien, sans gluten, etc.).
 
-### Install dependencies
+### 2.6. Suggestions de substitutions d’ingrédients
+- Proposer des alternatives pour certains ingrédients en fonction des disponibilités et préférences.
+- Gestion par une base de données statique ou API externe.
 
-You can use one of them `npm`, `yarn`, `pnpm`, `bun`, Example using `npm`:
+### 2.7. Interface utilisateur responsive
+- Utilisation de **Tailwind CSS** pour une interface moderne et adaptative.
+- Optimisation mobile/desktop pour une expérience fluide.
 
-```bash
-npm install
-```
+---
 
-### Run the development server
+## 3. Stack technologique
 
-```bash
-npm run dev
-```
+### 3.1. Frontend
+- **Next.js** pour une application performante avec SSR/SSG.
+- **Tailwind CSS** pour un design rapide et responsive.
 
-### Setup pnpm (optional)
+### 3.2. Backend
+- **Next.js API Routes** pour gérer les requêtes (GET, POST, etc.).
+- **Node.js/Express** en option pour une architecture plus complexe.
 
-If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
+### 3.3. Base de données
+- **MongoDB Atlas** pour stocker les recettes, utilisateurs, ingrédients et menus.
 
-```bash
-public-hoist-pattern[]=*@heroui/*
-```
+### 3.4. Authentification
+- **NextAuth.js** ou **Firebase Auth** pour gérer les comptes utilisateurs.
 
-After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
+### 3.5. APIs externes
+- **OpenFoodFacts**, **Edamam**, **USDA API** pour les données nutritionnelles.
 
-## License
+### 3.6. Stockage des images
+- **Cloudinary** pour l’optimisation et le CDN.
+- **Firebase Storage** en alternative.
 
-Licensed under the [MIT license](https://github.com/heroui-inc/next-app-template/blob/main/LICENSE).
+---
+
+## 4. Architecture et bonnes pratiques
+
+### 4.1. Organisation du code
+- Pages Next.js structurées (Recettes, Panier, Menu, Profil...).
+- Composants React réutilisables (cards, listes d'ingrédients, etc.).
+
+### 4.2. Performance et mise en cache
+- Utilisation de **React Query/SWR** pour optimiser les appels API.
+- Stockage des calories des ingrédients en base pour réduire les requêtes externes.
+
+### 4.3. Scalabilité
+- MongoDB Atlas pour gérer l’augmentation des données.
+- API Routes Next.js pour un backend modulaire.
+- Cloudinary/Firebase pour le stockage d’images performant.
+
+### 4.4. Sécurité
+- Validation des entrées utilisateurs (sanitization, protection contre injections).
+- Authentification et restrictions d'accès sur les routes sensibles.
+
+### 4.5. Expérience utilisateur
+- Indicateurs de chargement pour l’appel aux API nutritionnelles.
+- Génération de menu avec affichage progressif.
+
+---
+
+## 5. Conclusion
+Avec cette architecture, l'application sera **modulaire, performante et scalable**. L'utilisation de **Next.js et MongoDB Atlas** garantit une bonne réactivité et une évolution fluide. L’intégration d’**APIs nutritionnelles**, d’un **système de gestion de menus**, et d’une **liste de courses intelligente** offrira une expérience utilisateur optimale.
+
+Prochaine étape : Développement du MVP et tests unitaires ! 🚀
+

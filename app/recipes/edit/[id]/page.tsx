@@ -1,16 +1,19 @@
-// app/recipes/manage/[id]/page.tsx
 "use client";
+// app/recipes/manage/[id]/page.tsx
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import RecipeForm from "@/components/recipes/RecipeForm";
+import { RecipeData } from "@/types/recipe";
+import { IngredientData } from "@/types/ingredient";
 
-export default function ManageRecipePage({ params }: { params: Promise<{ id: string }> }) {
+export default function EditRecipePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
 
     const isNew = id === "new";  // si "new", on est en création
-    const [recipe, setRecipe] = useState<any>(null); // contiendra la recette existante si édition
+    const [recipe, setRecipe] = useState<RecipeData>(); // contiendra la recette existante si édition
+    const [existingIngredients, setExistingIngredients] = useState<IngredientData[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Si on est en édition, on récupère la recette
@@ -36,7 +39,6 @@ export default function ManageRecipePage({ params }: { params: Promise<{ id: str
     }, [id, isNew]);
 
     // On peut éventuellement récupérer la liste d’ingrédients existants
-    const [existingIngredients, setExistingIngredients] = useState<any[]>([]);
 
     useEffect(() => {
         // exemple : fetch vers /api/ingredients
@@ -91,7 +93,7 @@ export default function ManageRecipePage({ params }: { params: Promise<{ id: str
     const initialData = recipe ? { ...defaultData, ...recipe } : defaultData;
 
     return (
-        <main className="p-6">
+        <main className="p-6 h-full">
             <h1 className="text-2xl font-bold mb-4">
                 {isNew ? "Créer une recette" : `Modifier la recette #${id}`}
             </h1>

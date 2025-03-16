@@ -19,7 +19,10 @@ export default async function RecipeDetailPage({ params }: Props) {
     const recipe = await res.json();
 
     return (
-        <main className="p-6">
+        <main className="p-6 h-full">
+            <h1 className="text-2xl font-bold mb-4">
+                Détail de la recette
+            </h1>
             <RecipeDetail recipe={recipe} />
         </main>
     );
