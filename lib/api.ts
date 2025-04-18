@@ -1,7 +1,8 @@
-import { IIngredient, IRecipe } from "@/types/recipe";
+import { RecipeData } from "@/types/recipe";
+import { IngredientData } from "@/types/ingredient";
 
 // Pour récupérer la liste des recettes
-export async function fetchRecipesAPI(): Promise<IRecipe[]> {
+export async function fetchRecipesAPI(): Promise<RecipeData[]> {
     const res = await fetch("/api/recipes");
 
     if (!res.ok) {
@@ -11,7 +12,7 @@ export async function fetchRecipesAPI(): Promise<IRecipe[]> {
     return res.json();
 }
 // Pour récupérer la liste des recettes
-export async function fetchIngredientsAPI(): Promise<IIngredient[]> {
+export async function fetchIngredientsAPI(): Promise<IngredientData[]> {
     const res = await fetch("/api/ingredients");
 
     if (!res.ok) {
@@ -24,8 +25,8 @@ export async function fetchIngredientsAPI(): Promise<IIngredient[]> {
 // Pour créer une nouvelle recette
 // On utilise Omit<IRecipe, "_id"> car la nouvelle recette n'a pas encore d'ID
 export async function createRecipeAPI(
-    newRecipe: Omit<IRecipe, "_id">
-): Promise<IRecipe> {
+    newRecipe: Omit<RecipeData, "_id">
+): Promise<RecipeData> {
     const res = await fetch("/api/recipes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

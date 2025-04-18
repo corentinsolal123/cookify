@@ -1,11 +1,11 @@
 "use client";
 
 import { Avatar, Badge, Card, CardBody, CardHeader } from "@heroui/react";
-import { IRecipe } from "@/types/recipe";
+import { RecipeData } from "@/types/recipe";
 import { ReactElement } from "react";
 
 interface RecipeDetailProps {
-    recipe: IRecipe;
+    recipe: RecipeData;
 }
 
 export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElement{
@@ -14,9 +14,10 @@ export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElemen
             {/* Image et infos pratiques */}
             <div className="col-span-3 space-y-4">
                 <Card>
-                    <CardBody className="p-4">
+                    <CardBody className="p-4 space-y-2">
+                        <h2>Nom: {recipe.name}</h2>
                         <img
-                            src={recipe.image || "/placeholder.png"}
+                            src={recipe.image || "https://placehold.co/400x400.png"}
                             alt={recipe.name}
                             className="w-full h-48 object-cover rounded-lg"
                         />
@@ -63,7 +64,7 @@ export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElemen
                             {recipe.ingredients.map((ingredient, index) => (
                                 <li key={index} className="flex justify-between">
                                     <span>{ingredient.name}</span>
-                                    <span>{ingredient.quantity}</span>
+                                    <span>{ingredient.quantityPerServing}</span>
                                 </li>
                             ))}
                         </ul>

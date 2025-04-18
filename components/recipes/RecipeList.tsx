@@ -1,10 +1,10 @@
 "use client";
 
-import { IRecipe } from "@/types/recipe";
+import { RecipeData } from "@/types/recipe";
 import { Card, CardBody, CardHeader, Divider, Link } from "@heroui/react";
 
 interface RecipeListProps {
-    recipes: IRecipe[];
+    recipes: RecipeData[];
 }
 
 export default function RecipeList({ recipes }: RecipeListProps) {

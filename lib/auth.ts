@@ -2,14 +2,10 @@
 import bcrypt from "bcryptjs";
 import clientPromise from "./mongodb";
 
-// Remplace "yourDatabaseName" par le nom de ta base de données
-const DATABASE_NAME = "cookifyDB";
-
 export async function findUserByUsername(username: string) {
     const client = await clientPromise;
-    const db = client.db(DATABASE_NAME);
-    const user = await db.collection("users").findOne({ username });
-    return user;
+    const db = client.db();
+    return await db.collection("users").findOne({ username });
 }
 
 export async function verifyPassword(
@@ -26,7 +22,7 @@ export async function createUser(
 ) {
     const hashedPassword = await bcrypt.hash(password, 12);
     const client = await clientPromise;
-    const db = client.db(DATABASE_NAME);
+    const db = client.db();
     const result = await db.collection("users").insertOne({
         username,
         email,
