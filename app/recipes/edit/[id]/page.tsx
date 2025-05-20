@@ -3,9 +3,10 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import RecipeForm from "@/components/recipes/RecipeForm";
+import RecipeFormWrapper from "@/components/recipes/RecipeFormWrapper";
 import { RecipeData } from "@/types/recipe";
 import { IngredientData } from "@/types/ingredient";
+import { getRecipeById, getAllIngredients, createRecipe, updateRecipe } from "@/services/recipeServices";
 
 export default function EditRecipePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -19,11 +20,7 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
     // Si on est en édition, on récupère la recette
     useEffect(() => {
         if (!isNew) {
-            fetch(`/api/recipes/${id}`)
-                .then((res) => {
-                    if (!res.ok) throw new Error("Not found");
-                    return res.json();
-                })
+            getRecipeById(id)
                 .then((data) => {
                     setRecipe(data);
                     setLoading(false);
@@ -39,11 +36,8 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
     }, [id, isNew]);
 
     // On peut éventuellement récupérer la liste d’ingrédients existants
-
     useEffect(() => {
-        // exemple : fetch vers /api/ingredients
-        fetch("/api/ingredients")
-            .then((res) => res.json())
+        getAllIngredients()
             .then((data) => setExistingIngredients(data))
             .catch((err) => console.error(err));
     }, []);
@@ -51,23 +45,18 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
     // Gestion de la soumission du formulaire
     async function handleSubmit(data: any) {
         try {
-            const method = isNew ? "POST" : "PUT";
-            const url = isNew ? "/api/recipes" : `/api/recipes/${id}`;
+            let result;
 
-            const res = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
-
-            if (res.ok) {
-                // Redirection après succès
-                router.push("/recipes");
+            if (isNew) {
+                result = await createRecipe(data);
             } else {
-                console.error("Erreur lors de la sauvegarde de la recette");
+                result = await updateRecipe(id, data);
             }
+
+            // Redirection après succès
+            router.push("/recipes");
         } catch (err) {
-            console.error(err);
+            console.error("Erreur lors de la sauvegarde de la recette:", err);
         }
     }
 
@@ -97,7 +86,7 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
             <h1 className="text-2xl font-bold mb-4">
                 {isNew ? "Créer une recette" : `Modifier la recette #${id}`}
             </h1>
-            <RecipeForm
+            <RecipeFormWrapper
                 onSubmit={handleSubmit}
                 existingIngredients={existingIngredients}
                 initialData={initialData}

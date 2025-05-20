@@ -3,59 +3,74 @@
 import {
     Input,
     Kbd,
-    Link,
     link as linkStyles,
     Navbar as HeroUINavbar,
     NavbarBrand,
     NavbarContent,
     NavbarItem,
     NavbarMenu,
-    NavbarMenuToggle
+    NavbarMenuItem,
+    NavbarMenuToggle,
+    Button,
+    Dropdown,
+    DropdownTrigger,
+    DropdownMenu,
+    DropdownItem
 } from "@heroui/react";
 import NextLink from "next/link";
 import clsx from "clsx";
+import { usePathname } from "next/navigation";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/global/Theme-switch";
-import { GithubIcon, Logo, SearchIcon } from "@/components/global/Icons";
+import { Logo, SearchIcon } from "@/components/global/Icons";
 import AuthStatus from "@/components/auth/AuthStatus";
 
 export const Navbar = () => {
+    const pathname = usePathname();
+    const isActive = (href: string) => pathname === href;
+
     const searchInput = (
         <Input
             aria-label="Search"
             classNames={{
-                inputWrapper: "bg-default-100",
+                inputWrapper: "bg-gray-100 dark:bg-gray-800 border-0",
                 input: "text-sm"
             }}
             endContent={<Kbd className="hidden lg:inline-block" keys={["command"]}>K</Kbd>}
             labelPlacement="outside"
-            placeholder="Search..."
+            placeholder="Search recipes..."
             startContent={
-                <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
+                <SearchIcon className="text-base text-gray-500 dark:text-gray-400 pointer-events-none flex-shrink-0" />
             }
             type="search"
+            size="sm"
+            radius="lg"
         />
     );
 
     return (
-        <HeroUINavbar maxWidth="xl" position="sticky">
+        <HeroUINavbar 
+            maxWidth="xl" 
+            position="sticky" 
+            className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800"
+            shouldHideOnScroll
+        >
             <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
                 <NavbarBrand as="li" className="gap-3 max-w-fit">
-                    <NextLink className="flex justify-start items-center gap-1" href="/">
-                        <Logo />
-                        <p className="font-bold text-inherit">{siteConfig.name}</p>
+                    <NextLink className="flex justify-start items-center gap-2" href="/">
+                        <Logo className="text-primary-600 dark:text-primary-400" />
+                        <p className="font-bold text-xl text-gray-900 dark:text-white">{siteConfig.name}</p>
                     </NextLink>
                 </NavbarBrand>
-                <ul className="hidden lg:flex gap-4 justify-start ml-2">
+                <ul className="hidden lg:flex gap-6 justify-start ml-6">
                     {siteConfig.navItems.map((item) => (
                         <NavbarItem key={item.href}>
                             <NextLink
                                 className={clsx(
-                                    linkStyles({ color: "foreground" }),
-                                    "data-[active=true]:text-primary data-[active=true]:font-medium"
+                                    "font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2",
+                                    isActive(item.href) && "text-primary-600 dark:text-primary-400 font-semibold"
                                 )}
-                                color="foreground"
                                 href={item.href}
                             >
                                 {item.label}
@@ -69,46 +84,70 @@ export const Navbar = () => {
                 className="hidden sm:flex basis-1/5 sm:basis-full"
                 justify="end"
             >
-                <NavbarItem className="hidden sm:flex gap-2">
-                    <Link isExternal aria-label="Github" href={siteConfig.links.github}>
-                        <GithubIcon className="text-default-500" />
-                    </Link>
-                    <ThemeSwitch />
-                    {/* Ajout de AuthStatus pour l'authentification */}
+                <NavbarItem className="hidden lg:flex w-64">{searchInput}</NavbarItem>
+                <NavbarItem className="ml-2">
                     <AuthStatus />
                 </NavbarItem>
-                <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
+                <NavbarItem className="ml-2">
+                    <ThemeSwitch />
+                </NavbarItem>
+                <NavbarItem className="hidden md:flex ml-2">
+                    <Button 
+                        as={NextLink} 
+                        href="/recipes/create" 
+                        color="primary" 
+                        variant="flat" 
+                        radius="full"
+                        startContent={
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        }
+                    >
+                        New Recipe
+                    </Button>
+                </NavbarItem>
             </NavbarContent>
 
             <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-                <Link isExternal aria-label="Github" href={siteConfig.links.github}>
-                    <GithubIcon className="text-default-500" />
-                </Link>
                 <ThemeSwitch />
                 <NavbarMenuToggle />
             </NavbarContent>
 
-            <NavbarMenu>
-                {searchInput}
-                <div className="mx-4 mt-2 flex flex-col gap-2">
-                    {siteConfig.navMenuItems.map((item, index) => (
-                        <NavbarItem key={`${item}-${index}`}>
-                            <Link
-                                color={
-                                    index === 2
-                                        ? "primary"
-                                        : index === siteConfig.navItems.length - 1
-                                            ? "danger"
-                                            : "foreground"
-                                }
-                                href="#"
-                                size="lg"
-                            >
-                                {item.label}
-                            </Link>
-                        </NavbarItem>
-                    ))}
+            <NavbarMenu className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md pt-6 pb-6">
+                <div className="mx-4 mt-2 mb-6">
+                    {searchInput}
                 </div>
+                {siteConfig.navItems.map((item, index) => (
+                    <NavbarMenuItem key={`${item.href}-${index}`}>
+                        <NextLink
+                            className={clsx(
+                                "w-full font-medium text-lg text-gray-700 dark:text-gray-300",
+                                isActive(item.href) && "text-primary-600 dark:text-primary-400 font-semibold"
+                            )}
+                            href={item.href}
+                        >
+                            {item.label}
+                        </NextLink>
+                    </NavbarMenuItem>
+                ))}
+                <NavbarMenuItem className="mt-6">
+                    <Button 
+                        as={NextLink} 
+                        href="/recipes/create" 
+                        color="primary" 
+                        className="w-full"
+                        startContent={
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        }
+                    >
+                        New Recipe
+                    </Button>
+                </NavbarMenuItem>
             </NavbarMenu>
         </HeroUINavbar>
     );

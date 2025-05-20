@@ -3,6 +3,7 @@
 import { Avatar, Badge, Card, CardBody, CardHeader } from "@heroui/react";
 import { RecipeData } from "@/types/recipe";
 import { ReactElement } from "react";
+import AddToShoppingList from "./AddToShoppingList";
 
 interface RecipeDetailProps {
     recipe: RecipeData;
@@ -10,7 +11,7 @@ interface RecipeDetailProps {
 
 export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElement{
     return (
-        <div className="container mx-auto p-6 grid grid-cols-12 gap-6">
+        <div className="container mx-auto py-6 grid grid-cols-12 gap-6">
             {/* Image et infos pratiques */}
             <div className="col-span-3 space-y-4">
                 <Card>
@@ -54,7 +55,7 @@ export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElemen
             </div>
 
             {/* Liste des ingrédients */}
-            <div className="col-span-3">
+            <div className="col-span-3 space-y-4">
                 <Card>
                     <CardHeader>
                         <h2 className="text-xl font-bold">Ingrédients</h2>
@@ -64,10 +65,23 @@ export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElemen
                             {recipe.ingredients.map((ingredient, index) => (
                                 <li key={index} className="flex justify-between">
                                     <span>{ingredient.name}</span>
-                                    <span>{ingredient.quantityPerServing}</span>
+                                    <span>{ingredient.quantityPerServing} {ingredient.unit}</span>
                                 </li>
                             ))}
                         </ul>
+                    </CardBody>
+                </Card>
+
+                {/* Ajout à la liste de courses */}
+                <Card>
+                    <CardHeader>
+                        <h2 className="text-xl font-bold">Liste de courses</h2>
+                    </CardHeader>
+                    <CardBody>
+                        <AddToShoppingList 
+                            recipeId={recipe._id || ""} 
+                            recipeName={recipe.name} 
+                        />
                     </CardBody>
                 </Card>
             </div>
