@@ -29,7 +29,7 @@
  "devDependencies": {
   "@react-types/shared": "^3.29.1",
   "@testing-library/jest-dom": "^6.1.4",
-  "@testing-library/react": "^14.0.0",
+  "@testing-library/react": "^16.0.0",
   "@types/jest": "^29.5.5",
   "@types/node": "^22.15.20",
   "@types/react": "^19.1.4",
