@@ -34,7 +34,7 @@ export async function PATCH(req: NextRequest) {
         
         // Find and update the item
         const itemIndex = shoppingList.items.findIndex(
-            (item) => item._id.toString() === data.itemId
+            (item:any) => item._id.toString() === data.itemId
         );
         
         if (itemIndex === -1) {

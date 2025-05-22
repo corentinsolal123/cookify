@@ -74,6 +74,7 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
         calories: 0,
         creator: "",
         steps: [""],
+        servings: 1,
         ingredients: []
         // ...etc
     };

@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         
         // Check if recipe is already in the shopping list
         const recipeExists = shoppingList.recipes.some(
-            (r) => r.toString() === data.recipeId
+            (r: any) => r.toString() === data.recipeId
         );
         
         if (!recipeExists) {
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
             
             // Check if ingredient already exists in the shopping list
             const existingItemIndex = shoppingList.items.findIndex(
-                (item) => 
+                (item: any) =>
                     item.ingredient && 
                     item.ingredient.toString() === ingredient._id.toString() &&
                     item.unit === ingredient.unit
@@ -144,13 +144,13 @@ export async function DELETE(req: NextRequest) {
         
         // Remove recipe from the shopping list
         shoppingList.recipes = shoppingList.recipes.filter(
-            (r) => r.toString() !== recipeId
+            (r: any) => r.toString() !== recipeId
         );
         
         // Remove or reduce quantities of ingredients from this recipe
         for (const ingredient of recipe.ingredients) {
             const existingItemIndex = shoppingList.items.findIndex(
-                (item) => 
+                (item: any) =>
                     item.ingredient && 
                     item.ingredient.toString() === ingredient._id.toString() &&
                     item.unit === ingredient.unit

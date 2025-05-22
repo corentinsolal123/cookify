@@ -4,11 +4,11 @@ import RecipeDetailWrapper from "@/components/recipes/RecipeDetailWrapper";
 import { getRecipeById } from "@/services/recipeServices";
 
 type Props = {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 };
 
 export default async function RecipeDetailPage({ params }: Props) {
-    const { id } = params;
+    const { id } = await params;
 
     try {
         // Récupération de la recette

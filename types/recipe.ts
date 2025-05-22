@@ -12,6 +12,7 @@ export interface RecipeData {
     calories: number;
     creator: string;
     steps: string[];
+    servings: number;
     ingredients: IngredientData[];
 }
 

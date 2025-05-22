@@ -20,6 +20,7 @@ export default function RecipeForm({ onSubmit, initialData, isNew }: RecipeFormP
     const [calories, setCalories] = useState(initialData.calories || 0);
     const [creator, setCreator] = useState(initialData.creator || "");
     const [steps, setSteps] = useState<string[]>(initialData.steps || [""]);
+    const [servings, setServings] = useState(initialData.servings || 1);
     const [ingredients, setIngredients] = useState<IngredientData[]>(initialData.ingredients || []);
 
     // 🔍 Recherche d’ingrédients
@@ -70,7 +71,7 @@ export default function RecipeForm({ onSubmit, initialData, isNew }: RecipeFormP
     // 📝 Soumettre le formulaire
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        const recipeData: RecipeData = { name, description, difficulty, prepTime, cookTime, calories, creator, steps, ingredients };
+        const recipeData: RecipeData = { name, description, difficulty, prepTime, cookTime, calories, creator, steps, servings, ingredients };
         onSubmit(recipeData);
     }
 

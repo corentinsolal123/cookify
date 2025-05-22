@@ -4,7 +4,16 @@ import RecipeListWrapper from "@/components/recipes/RecipeListWrapper";
 import RecipePageHeader from "@/components/recipes/RecipePageHeader";
 import { getAllRecipes } from "@/services/recipeServices";
 
-export default async function RecipesPage() {
+type Props = {
+    params: Promise<{}>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function RecipesPage({ params, searchParams }: Props) {
+    // Attendre les paramètres (même si params est vide ici)
+    await params;
+    const resolvedSearchParams = await searchParams;
+
     // Fetch recipes data server-side
     const recipes = await getAllRecipes();
 
