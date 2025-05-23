@@ -8,6 +8,7 @@ import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/global/Navbar";
 import { Footer } from "@/components/global/Footer";
 import React from "react";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
     title: {
@@ -29,7 +30,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html suppressHydrationWarning lang="en">
+        <html suppressHydrationWarning lang="fr">
         <head />
         <body className={clsx("min-h-screen font-sans antialiased", fontSans.variable)}>
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Footer />
             </div>
         </Providers>
+        <SpeedInsights/>
         </body>
         </html>
     );
