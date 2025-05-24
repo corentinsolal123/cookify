@@ -1,10 +1,14 @@
-"use client";
-
-import { subtitle, title } from "@/components/global/Primitives";
-import { Button, Card, CardBody, CardFooter, CardHeader, Divider, Image } from "@heroui/react";
 import NextLink from "next/link";
+import { Button } from "@heroui/button";
+import { Image } from "@heroui/image";
+import { Divider } from "@heroui/divider";
+import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
+import { getFeaturedRecipe, getStats } from "@/lib/data";
 
-export default function Home() {
+export default async function Home() {
+    const stats = await getStats();
+    const featuredRecipe = await getFeaturedRecipe();
+
     return (
         <div className="container-custom py-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -45,15 +49,15 @@ export default function Home() {
                     </div>
                     <div className="grid grid-cols-3 gap-4 mt-4">
                         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
-                            <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">100+</div>
+                            <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">{stats.recipesCount}+</div>
                             <div className="text-sm text-gray-600 dark:text-gray-400">Recettes</div>
                         </div>
                         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
-                            <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">50+</div>
+                            <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">{stats.usersCount}+</div>
                             <div className="text-sm text-gray-600 dark:text-gray-400">Utilisateurs</div>
                         </div>
                         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
-                            <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">24/7</div>
+                            <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">{stats.support}</div>
                             <div className="text-sm text-gray-600 dark:text-gray-400">Support</div>
                         </div>
                     </div>
@@ -71,19 +75,19 @@ export default function Home() {
                                 <Image
                                     alt="Recette en vedette"
                                     className="object-cover w-full aspect-video rounded-xl"
-                                    src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+                                    src={featuredRecipe.image}
                                 />
                             </div>
-                            <h5 className="font-bold text-lg text-gray-900 dark:text-white">Salade Méditerranéenne</h5>
+                            <h5 className="font-bold text-lg text-gray-900 dark:text-white">{featuredRecipe.name}</h5>
                             <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">
-                                Une salade fraîche et colorée avec des tomates, concombres, olives et feta, assaisonnée d'huile d'olive et d'herbes.
+                                {featuredRecipe.description}
                             </p>
                         </CardBody>
                         <Divider />
                         <CardFooter className="px-6 py-4">
                             <Button 
                                 as={NextLink}
-                                href="/recipes" 
+                                href={"/recipe/" + featuredRecipe._id}
                                 color="primary" 
                                 variant="flat" 
                                 className="w-full"

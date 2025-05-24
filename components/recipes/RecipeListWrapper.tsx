@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RecipeData } from "@/types/recipe";
 import RecipeList from "./RecipeList";
 import RecipeListSkeleton from "./RecipeListSkeleton";

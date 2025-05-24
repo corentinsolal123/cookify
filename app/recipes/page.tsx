@@ -1,7 +1,6 @@
-// app/recipes/page.tsx
-
-import RecipeListWrapper from "@/components/recipes/RecipeListWrapper";
+// app/recipes/page.tsx (Server Component)
 import RecipePageHeader from "@/components/recipes/RecipePageHeader";
+import RecipeList from "@/components/recipes/RecipeList";
 import { getAllRecipes } from "@/services/recipeServices";
 
 type Props = {
@@ -10,17 +9,19 @@ type Props = {
 };
 
 export default async function RecipesPage({ params, searchParams }: Props) {
-    // Attendre les paramètres (même si params est vide ici)
     await params;
     const resolvedSearchParams = await searchParams;
 
-    // Fetch recipes data server-side
+    // ✅ Server-side data fetching
     const recipes = await getAllRecipes();
 
     return (
         <main className="pb-6 h-full w-full">
-            <RecipePageHeader title="Liste des recettes" />
-            <RecipeListWrapper recipes={recipes} />
+            <RecipePageHeader
+                title="Liste des recettes"
+                subtitle={`${recipes.length} recette${recipes.length > 1 ? 's' : ''} disponible${recipes.length > 1 ? 's' : ''}`}
+            />
+            <RecipeList recipes={recipes} />
         </main>
     );
 }

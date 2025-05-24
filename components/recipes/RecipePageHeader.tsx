@@ -1,7 +1,7 @@
-"use client";
-
-import { Button, Divider, Link, Input } from "@heroui/react";
+// components/recipes/RecipePageHeader.tsx (Server Component maintenant !)
+import { Button } from "@heroui/button";
 import NextLink from "next/link";
+import { SearchInput } from "./SearchInput"; // ← Nouveau composant client pour la search
 
 interface RecipePageHeaderProps {
     title: string;
@@ -20,22 +20,9 @@ export default function RecipePageHeader({ title, subtitle }: RecipePageHeaderPr
                         )}
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-                        <Input
-                            type="search"
-                            placeholder="Rechercher une recette..."
-                            size="sm"
-                            radius="lg"
-                            startContent={
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            }
-                            className="w-full sm:w-64"
-                            classNames={{
-                                inputWrapper: "bg-gray-100 dark:bg-gray-700 border-0",
-                                input: "text-sm"
-                            }}
-                        />
+                        {/* ✅ Search séparée en client component */}
+                        <SearchInput />
+
                         <Button
                             as={NextLink}
                             href="/recipes/edit/new"
@@ -43,7 +30,9 @@ export default function RecipePageHeader({ title, subtitle }: RecipePageHeaderPr
                             variant="solid"
                             radius="full"
                             startContent={
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                     strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"></line>
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>

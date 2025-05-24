@@ -1,35 +1,24 @@
-"use client";
-
+// components/navbar/Navbar.tsx (Server Component)
+import { Kbd } from "@heroui/kbd";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
 import {
-    Input,
-    Kbd,
-    link as linkStyles,
     Navbar as HeroUINavbar,
     NavbarBrand,
     NavbarContent,
     NavbarItem,
     NavbarMenu,
     NavbarMenuItem,
-    NavbarMenuToggle,
-    Button,
-    Dropdown,
-    DropdownTrigger,
-    DropdownMenu,
-    DropdownItem
-} from "@heroui/react";
+    NavbarMenuToggle
+} from "@heroui/navbar";
 import NextLink from "next/link";
-import clsx from "clsx";
-import { usePathname } from "next/navigation";
-
 import { siteConfig } from "@/config/site";
-import { ThemeSwitch } from "@/components/global/Theme-switch";
 import { Logo, SearchIcon } from "@/components/global/Icons";
 import AuthStatus from "@/components/auth/AuthStatus";
+import { ThemeSwitch } from "@/components/global/Theme-switch";
+import { NavLinks } from "@/components/navbar/NavLinks"; // ← Nouveau composant client
 
 export const Navbar = () => {
-    const pathname = usePathname();
-    const isActive = (href: string) => pathname === href;
-
     const searchInput = (
         <Input
             aria-label="Search"
@@ -50,9 +39,9 @@ export const Navbar = () => {
     );
 
     return (
-        <HeroUINavbar 
-            maxWidth="xl" 
-            position="sticky" 
+        <HeroUINavbar
+            maxWidth="xl"
+            position="sticky"
             className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800"
             shouldHideOnScroll
         >
@@ -63,43 +52,30 @@ export const Navbar = () => {
                         <p className="font-bold text-xl text-gray-900 dark:text-white">{siteConfig.name}</p>
                     </NextLink>
                 </NavbarBrand>
-                <ul className="hidden lg:flex gap-6 justify-start ml-6">
-                    {siteConfig.navItems.map((item) => (
-                        <NavbarItem key={item.href}>
-                            <NextLink
-                                className={clsx(
-                                    "font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2",
-                                    isActive(item.href) && "text-primary-600 dark:text-primary-400 font-semibold"
-                                )}
-                                href={item.href}
-                            >
-                                {item.label}
-                            </NextLink>
-                        </NavbarItem>
-                    ))}
-                </ul>
+
+                {/* ✅ Partie client séparée pour les liens actifs */}
+                <NavLinks />
             </NavbarContent>
 
-            <NavbarContent
-                className="hidden sm:flex basis-1/5 sm:basis-full"
-                justify="end"
-            >
+            <NavbarContent className="hidden sm:flex basis-1/5 sm:basis-full" justify="end">
                 <NavbarItem className="hidden lg:flex w-64">{searchInput}</NavbarItem>
                 <NavbarItem className="ml-2">
-                    <AuthStatus />
+                    <AuthStatus /> {/* ✅ Déjà client */}
                 </NavbarItem>
                 <NavbarItem className="ml-2">
-                    <ThemeSwitch />
+                    <ThemeSwitch /> {/* ✅ Probablement client */}
                 </NavbarItem>
                 <NavbarItem className="hidden md:flex ml-2">
-                    <Button 
-                        as={NextLink} 
-                        href="/recipes/create" 
-                        color="primary" 
-                        variant="flat" 
+                    <Button
+                        as={NextLink}
+                        href="/recipes/create"
+                        color="primary"
+                        variant="flat"
                         radius="full"
                         startContent={
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                 strokeLinejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
@@ -119,27 +95,18 @@ export const Navbar = () => {
                 <div className="mx-4 mt-2 mb-6">
                     {searchInput}
                 </div>
-                {siteConfig.navItems.map((item, index) => (
-                    <NavbarMenuItem key={`${item.href}-${index}`}>
-                        <NextLink
-                            className={clsx(
-                                "w-full font-medium text-lg text-gray-700 dark:text-gray-300",
-                                isActive(item.href) && "text-primary-600 dark:text-primary-400 font-semibold"
-                            )}
-                            href={item.href}
-                        >
-                            {item.label}
-                        </NextLink>
-                    </NavbarMenuItem>
-                ))}
+                {/* ✅ Ici aussi, composant client pour les liens actifs */}
+                <NavLinks isMobile />
                 <NavbarMenuItem className="mt-6">
-                    <Button 
-                        as={NextLink} 
-                        href="/recipes/create" 
-                        color="primary" 
+                    <Button
+                        as={NextLink}
+                        href="/recipes/create"
+                        color="primary"
                         className="w-full"
                         startContent={
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                 strokeLinejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>

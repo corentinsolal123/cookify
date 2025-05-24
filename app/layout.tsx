@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { Providers } from "./Providers";
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
-import { Navbar } from "@/components/global/Navbar";
+import { Navbar } from "@/components/navbar/Navbar";
 import { Footer } from "@/components/global/Footer";
 import React from "react";
 import { SpeedInsights } from "@vercel/speed-insights/next"
