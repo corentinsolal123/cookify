@@ -20,13 +20,13 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         }
     };
 
-    const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0);
+    const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
 
     return (
         <Card className="group hover:shadow-2xl transition-all duration-300 border-0 bg-white dark:bg-gray-800 overflow-hidden">
             {/* Image avec overlay gradient */}
             <div className="relative h-48 overflow-hidden">
-                <NextLink href={`/recipes/${recipe._id}`}>
+                <NextLink href={`/recipes/${recipe.id}`}>
                     {recipe.image ? (
                         <Image
                             src={recipe.image}
@@ -67,7 +67,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
 
                 {/* Actions (favoris, etc.) */}
                 <div className="absolute top-3 right-3">
-                    <RecipeCardActions recipeId={recipe._id!} />
+                    <RecipeCardActions recipeId={recipe.id!} />
                 </div>
 
                 {/* Infos rapides en bas */}
@@ -94,7 +94,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
             </div>
 
             <CardBody className="p-6">
-                <NextLink href={`/recipes/${recipe._id}`} className="block group-hover:text-primary-600 transition-colors">
+                <NextLink href={`/recipes/${recipe.id}`} className="block group-hover:text-primary-600 transition-colors">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 leading-tight">
                         {recipe.name}
                     </h3>

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Button, Input, Spinner } from "@heroui/react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/auth/AuthProvider";
 
 interface AddToShoppingListProps {
     recipeId: string;
@@ -10,14 +10,14 @@ interface AddToShoppingListProps {
 }
 
 export default function AddToShoppingList({ recipeId, recipeName }: Readonly<AddToShoppingListProps>) {
-    const { status } = useSession();
     const [servings, setServings] = useState(1);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState<"success" | "error">("success");
+    const { user } = useAuth();
 
     const handleAddToShoppingList = async () => {
-        if (status !== "authenticated") {
+        if (!user) {
             setMessage("Vous devez être connecté pour ajouter à votre liste de courses");
             setMessageType("error");
             return;
@@ -63,7 +63,7 @@ export default function AddToShoppingList({ recipeId, recipeName }: Readonly<Add
                 <Button
                     color="primary"
                     onPress={handleAddToShoppingList}
-                    isDisabled={loading || status !== "authenticated"}
+                    isDisabled={loading || !user}
                 >
                     {loading ? (
                         <Spinner size="sm" color="white" />
@@ -79,7 +79,7 @@ export default function AddToShoppingList({ recipeId, recipeName }: Readonly<Add
                 </p>
             )}
             
-            {status !== "authenticated" && (
+            {!user && (
                 <p className="text-sm text-danger">
                     Vous devez être <a href="/login" className="underline">connecté</a> pour utiliser cette fonctionnalité
                 </p>

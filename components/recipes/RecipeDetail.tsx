@@ -27,8 +27,8 @@ export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElemen
                 <Card>
                     <CardBody className="p-4 space-y-2">
                         <Badge>{recipe.difficulty}</Badge>
-                        <p>⏱ Préparation : {recipe.prepTime} min</p>
-                        <p>🔥 Cuisson : {recipe.cookTime} min</p>
+                        <p>⏱ Préparation : {recipe.prep_time} min</p>
+                        <p>🔥 Cuisson : {recipe.cook_time} min</p>
                         <p>⚡ Calories : {recipe.calories} kcal</p>
                         <div className="flex items-center space-x-2">
                             <Avatar size="sm" />
@@ -79,7 +79,7 @@ export default function RecipeDetail({ recipe }: RecipeDetailProps): ReactElemen
                     </CardHeader>
                     <CardBody>
                         <AddToShoppingList 
-                            recipeId={recipe._id || ""} 
+                            recipeId={recipe.id || ""}
                             recipeName={recipe.name} 
                         />
                     </CardBody>

@@ -55,9 +55,9 @@ export default async function RecipesSupabasePage({ params, searchParams }: Read
                 {/* Liste des recettes */}
                 <RecipeList
                     recipes={recipes}
-                    currentPage={page}
-                    totalPages={totalPages}
-                    hasFilters={!!(filters.search || filters.tags?.length || filters.difficulty || filters.maxPrepTime || filters.maxCookTime)}
+                    // currentPage={page}
+                    // totalPages={totalPages}
+                    // hasFilters={!!(filters.search || filters.tags?.length || filters.difficulty || filters.maxPrepTime || filters.maxCookTime)}
                 />
             </main>
         );

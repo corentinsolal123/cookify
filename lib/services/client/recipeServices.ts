@@ -1,5 +1,5 @@
 // lib/services/recipeServices.ts - CLIENT ONLY
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/client'
 import { RecipeData } from "@/types/recipe";
 import { SearchFilters } from "@/types/search";
 

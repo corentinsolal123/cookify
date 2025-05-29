@@ -56,18 +56,17 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
     }
 
     // Données initiales pour le formulaire
-    const defaultData = {
+    const defaultData: RecipeData = {
         name: "",
         description: "",
-        difficulty: "",
-        prepTime: 0,
-        cookTime: 0,
+        difficulty: "facile",
+        prep_time: 0,
+        cook_time: 0,
         calories: 0,
         creator: "",
         steps: [""],
         servings: 1,
         ingredients: []
-        // ...etc
     };
 
     // Si on est en édition, on fusionne la recette existante avec le default
@@ -80,7 +79,7 @@ export default function EditRecipePage({ params }: { params: Promise<{ id: strin
             </h1>
             <RecipeFormWrapper
                 onSubmit={handleSubmit}
-                existingIngredients={existingIngredients}
+                existingIngredients={[]}
                 initialData={initialData}
                 isNew={isNew}
             />

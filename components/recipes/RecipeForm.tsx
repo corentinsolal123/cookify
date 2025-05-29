@@ -15,8 +15,8 @@ export default function RecipeForm({ onSubmit, initialData, isNew }: RecipeFormP
     const [name, setName] = useState(initialData.name || "");
     const [description, setDescription] = useState(initialData.description || "");
     const [difficulty, setDifficulty] = useState(initialData.difficulty || "");
-    const [prepTime, setPrepTime] = useState(initialData.prepTime || 0);
-    const [cookTime, setCookTime] = useState(initialData.cookTime || 0);
+    const [prep_time, setPrepTime] = useState(initialData.prep_time || 0);
+    const [cook_time, setCookTime] = useState(initialData.cook_time || 0);
     const [calories, setCalories] = useState(initialData.calories || 0);
     const [creator, setCreator] = useState(initialData.creator || "");
     const [steps, setSteps] = useState<string[]>(initialData.steps || [""]);
@@ -71,7 +71,7 @@ export default function RecipeForm({ onSubmit, initialData, isNew }: RecipeFormP
     // 📝 Soumettre le formulaire
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        const recipeData: RecipeData = { name, description, difficulty, prepTime, cookTime, calories, creator, steps, servings, ingredients };
+        const recipeData: RecipeData = { name, description, difficulty, prep_time, cook_time, calories, creator, steps, servings, ingredients };
         onSubmit(recipeData);
     }
 
@@ -91,11 +91,22 @@ export default function RecipeForm({ onSubmit, initialData, isNew }: RecipeFormP
                         </Card>
                         <Card className="space-y-2">
                             <CardBody className="p-4 space-y-4">
-                                <Input label="Difficulté" placeholder="Difficulté"
-                                       value={difficulty} onChange={(e) => setDifficulty(e.target.value)} />
-                                <Input label="Préparation (min)" type="number" value={prepTime.toString()}
+                                <Select
+                                    label="Difficulté"
+                                    placeholder="Choisir la difficulté"
+                                    selectedKeys={difficulty ? [difficulty] : []}
+                                    onSelectionChange={(keys) => {
+                                        const selected = Array.from(keys)[0];
+                                        if (selected) setDifficulty(selected as "facile" | "moyen" | "difficile");
+                                    }}
+                                >
+                                    <SelectItem key="facile">Facile</SelectItem>
+                                    <SelectItem key="moyen">Moyen</SelectItem>
+                                    <SelectItem key="difficile">Difficile</SelectItem>
+                                </Select>
+                                <Input label="Préparation (min)" type="number" value={prep_time.toString()}
                                        onChange={(e) => setPrepTime(Number(e.target.value))} />
-                                <Input label="Cuisson (min)" type="number" value={cookTime.toString()}
+                                <Input label="Cuisson (min)" type="number" value={cook_time.toString()}
                                        onChange={(e) => setCookTime(Number(e.target.value))} />
                                 <Input label="Calories" type="number" value={calories.toString()}
                                        onChange={(e) => setCalories(Number(e.target.value))} />

@@ -1,5 +1,5 @@
 // lib/services/tagServices.ts - CLIENT ONLY
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/client'
 import { TagData } from "@/types/tag";
 
 // Client pour les composants client
