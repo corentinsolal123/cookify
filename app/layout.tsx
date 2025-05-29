@@ -9,6 +9,7 @@ import { Navbar } from "@/components/navbar/Navbar";
 import { Footer } from "@/components/global/Footer";
 import React from "react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
     title: {
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
         </Providers>
         <SpeedInsights />
+        <Analytics />
         </body>
         </html>
     );
