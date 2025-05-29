@@ -35,14 +35,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <head />
         <body className={clsx("min-h-screen font-sans antialiased", fontSans.variable)}>
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-            <div
-                className="fixed inset-0 bg-[#FFF5F0] bg-[url('/bg.svg')] bg-cover bg-center bg-no-repeat bg-fixed dark:bg-[#1E1B4B] -z-10"></div>
+            <div className="fixed inset-0 bg-[#FFF5F0] bg-[url('/bg.svg')] bg-cover bg-center bg-no-repeat bg-fixed dark:bg-[#1E1B4B] -z-10"></div>
             <div className="relative flex flex-col min-h-screen">
                 <Navbar />
                 <main className="mx-auto w-full pb-6 flex-grow">
                     {children}
                 </main>
-
                 <Footer />
             </div>
         </Providers>

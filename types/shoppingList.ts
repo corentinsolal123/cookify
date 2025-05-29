@@ -2,9 +2,9 @@
 import { RecipeData } from "@/types/recipe";
 
 export interface ShoppingListItemData {
-    id?: string; // UUID au lieu de _id
-    shopping_list_id?: string; // Relation avec la liste
-    ingredient_id?: string; // ID optionnel de l'ingrédient référence
+    id?: string;
+    shopping_list_id?: string;
+    ingredient_id?: string;
     name: string;
     quantity: number;
     unit: string;
@@ -14,13 +14,12 @@ export interface ShoppingListItemData {
 }
 
 export interface ShoppingListData {
-    id?: string; // UUID au lieu de _id
-    user_id?: string; // Relation avec l'utilisateur
+    id?: string;
+    user_id?: string;
     name: string;
-    recipes: string[]; // Array d'UUIDs de recettes
+    recipes: string[];
     created_at?: string;
     updated_at?: string;
-    // Relations chargées dynamiquement
     items?: ShoppingListItemData[];
     recipe_details?: RecipeData[];
 }

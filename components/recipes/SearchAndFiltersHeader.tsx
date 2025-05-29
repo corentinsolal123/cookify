@@ -1,4 +1,4 @@
-// components/recipes/SearchAndFiltersHeader.tsx - Version intégrée dans le header
+// components/recipes/SearchAndFiltersHeader.tsx
 "use client";
 
 import { useState, useEffect } from "react";

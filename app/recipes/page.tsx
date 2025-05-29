@@ -38,11 +38,6 @@ export default async function RecipesSupabasePage({ params, searchParams }: Read
 
         return (
             <main className="pb-6 h-full w-full">
-                {/* Indicateur Supabase temporaire */}
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    🚀 Cette page utilise Supabase ! ({recipes.length} recettes)
-                </div>
-
                 {/* Header avec filtres intégrés */}
                 <RecipePageHeader
                     title="Liste des recettes"

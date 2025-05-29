@@ -1,88 +1,95 @@
-"use client";
-// app/recipes/[id]//edit/page.tsx
+// app/recipes/[id]/edit/page.tsx
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { RecipeData } from '@/types/recipe';
+import RecipeEditForm from '@/components/recipes/form/RecipeEditForm';
 
-import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import RecipeFormWrapper from "@/components/recipes/RecipeFormWrapper";
-import { RecipeData } from "@/types/recipe";
-import { createRecipe, getRecipeById, updateRecipe } from "@/lib/services/client/recipeServices";
+import { getRecipeByIdServer } from '@/lib/services/server/recipeServices';
 
-export default function EditRecipePage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = use(params);
-    const router = useRouter();
-
-    const isNew = id === "new";  // si "new", on est en création
-    const [recipe, setRecipe] = useState<RecipeData>(); // contiendra la recette existante si édition
-    const [loading, setLoading] = useState(true);
-
-    // Si on est en édition, on récupère la recette
-    useEffect(() => {
-        if (!isNew) {
-            getRecipeById(id)
-                .then((data) => {
-                    setRecipe(data!);
-                    setLoading(false);
-                })
-                .catch((err) => {
-                    console.error(err);
-                    // Optionnel: gérer l'erreur (rediriger, afficher un message, etc.)
-                });
-        } else {
-            // En création, pas besoin de fetch
-            setLoading(false);
-        }
-    }, [id, isNew]);
-
-    // Gestion de la soumission du formulaire
-    async function handleSubmit(data: any) {
-        try {
-            let result;
-
-            if (isNew) {
-                result = await createRecipe(data);
-            } else {
-                result = await updateRecipe(id, data);
-            }
-
-            // Redirection après succès
-            router.push("/recipes");
-        } catch (err) {
-            console.error("Erreur lors de la sauvegarde de la recette:", err);
-        }
+// Fonction pour récupérer une recette existante (pour modification)
+async function getRecipe(id: string): Promise<RecipeData | null> {
+    // Si l'ID est "new", on crée une nouvelle recette
+    if (id === 'new') {
+        return null;
     }
 
-    if (loading) {
-        return <p>Chargement...</p>;
+    try {
+        // Utilisation du service Supabase serveur pour SSR
+        return await getRecipeByIdServer(id);
+    } catch (error) {
+        console.error('Erreur lors de la récupération de la recette:', error);
+        return null;
+    }
+}
+
+// Métadonnées dynamiques selon le contexte (création vs modification)
+export async function generateMetadata({
+                                           params
+                                       }: {
+    params: { id: string }
+}): Promise<Metadata> {
+    if (params.id === 'new') {
+        return {
+            title: 'Nouvelle recette - Cookify',
+            description: 'Créer une nouvelle recette sur Cookify',
+        };
     }
 
-    // Données initiales pour le formulaire
-    const defaultData: RecipeData = {
-        name: "",
-        description: "",
-        difficulty: "facile",
-        prep_time: 0,
-        cook_time: 0,
-        calories: 0,
-        creator: "",
-        steps: [""],
-        servings: 1,
-        ingredients: []
+    const recipe = await getRecipe(params.id);
+
+    return {
+        title: recipe
+            ? `Modifier ${recipe.name} - Cookify`
+            : 'Recette non trouvée - Cookify',
+        description: recipe
+            ? `Modifier la recette ${recipe.name}`
+            : 'La recette demandée n\'existe pas',
     };
+}
 
-    // Si on est en édition, on fusionne la recette existante avec le default
-    const initialData = recipe ? { ...defaultData, ...recipe } : defaultData;
+// Composant principal de la page d'édition
+export default async function RecipeEditPage({
+                                                 params
+                                             }: {
+    params: { id: string }
+}) {
+    // Récupération de la recette existante (si modification)
+    const existingRecipe = await getRecipe(params.id);
+
+    // Si on essaie de modifier une recette qui n'existe pas
+    if (params.id !== 'new' && !existingRecipe) {
+        notFound();
+    }
+
+    // Déterminer le mode (création ou modification)
+    const isCreating = params.id === 'new';
+    const pageTitle = isCreating ? 'Créer une nouvelle recette' : `Modifier ${existingRecipe?.name}`;
 
     return (
-        <main className="p-6 h-full">
-            <h1 className="text-2xl font-bold mb-4">
-                {isNew ? "Créer une recette" : `Modifier la recette #${id}`}
-            </h1>
-            <RecipeFormWrapper
-                onSubmit={handleSubmit}
-                existingIngredients={[]}
-                initialData={initialData}
-                isNew={isNew}
-            />
-        </main>
+        <div className="min-h-screen bg-gray-50">
+            <div className="max-w-4xl mx-auto px-4 py-8">
+
+                {/* En-tête de la page */}
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        {pageTitle}
+                    </h1>
+
+                    <p className="text-gray-600">
+                        {isCreating
+                            ? 'Remplis les informations ci-dessous pour créer ta nouvelle recette.'
+                            : 'Modifie les informations de ta recette et sauvegarde tes changements.'
+                        }
+                    </p>
+                </div>
+
+                {/* Formulaire d'édition */}
+                <RecipeEditForm
+                    initialData={existingRecipe}
+                    isCreating={isCreating}
+                    recipeId={params.id}
+                />
+            </div>
+        </div>
     );
 }

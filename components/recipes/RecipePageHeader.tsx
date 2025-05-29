@@ -19,17 +19,17 @@ export default async function RecipePageHeader({
                                                    recipeCount,
                                                    allTags,
                                                    currentFilters
-                                               }: RecipePageHeaderProps) {
+                                               }: Readonly<RecipePageHeaderProps>) {
     // Récupérer la session côté serveur
 
     return (
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 mb-8 pb-6">
             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
-                <div className="flex gap-6">
+                <div className="flex items-center gap-6">
                     {/* Titre et bouton créer (si connecté) */}
                     <div className="flex md:flex-row md:items-center md:justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{title}</h1>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h1>
                             {subtitle && (
                                 <p className="mt-2 text-gray-600 dark:text-gray-400">{subtitle}</p>
                             )}
@@ -39,7 +39,7 @@ export default async function RecipePageHeader({
                         {(
                             <Button
                                 as={NextLink}
-                                href="/recipes/edit/new"
+                                href="/recipes/new"
                                 color="primary"
                                 variant="solid"
                                 radius="full"

@@ -1,6 +1,6 @@
 // types/tag.ts
 export interface TagData {
-    id?: string; // UUID au lieu de _id
+    id?: string;
     name: string;
     slug: string;
     color: string;

@@ -1,29 +1,126 @@
 // app/recipes/[id]/page.tsx
-import RecipeDetailWrapper from "@/components/recipes/RecipeDetailWrapper";
-import { getRecipeById } from "@/lib/services/client/recipeServices";
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { RecipeData } from '@/types/recipe';
+import RecipeHeader from '@/components/recipes/view/RecipeHeader';
+import RecipeIngredients from '@/components/recipes/view/RecipeIngredients';
+import RecipeSteps from '@/components/recipes/view/RecipeSteps';
+import RecipeNutrition from '@/components/recipes/view/RecipeNutrition';
+import RecipeActions from '@/components/recipes/view/RecipeActions';
 
-type Props = {
-    params: Promise<{ id: string }>;
-};
+import { getAllRecipes, getRecipeByIdServer } from '@/lib/services/server/recipeServices';
 
-export default async function RecipeDetailPage({ params }: Readonly<Props>) {
-    const { id } = await params;
+// Cette fonction génère les paramètres statiques pour SSG
+// Next.js va pré-générer toutes ces pages au build
+export async function generateStaticParams() {
+    try {
+        // Utilisation du service Supabase serveur pour récupérer toutes les recettes
+        const result = await getAllRecipes({ limit: 100 });
 
-    // Récupération de la recette
-    const recipe = await getRecipeById(id);
+        return result.recipes.map((recipe) => ({
+            id: recipe.id,
+        }));
+    } catch (error) {
+        console.error('Erreur lors de la génération des paramètres statiques:', error);
+        return [];
+    }
+}
+
+// Cette fonction récupère les données de la recette
+async function getRecipe(id: string): Promise<RecipeData | null> {
+    try {
+        // Utilisation du service Supabase serveur
+        return await getRecipeByIdServer(id);
+    } catch (error) {
+        console.error('Erreur lors de la récupération de la recette:', error);
+        return null;
+    }
+}
+
+// Génération des métadonnées pour le SEO (SSG)
+export async function generateMetadata({
+                                           params
+                                       }: {
+    params: { id: string }
+}): Promise<Metadata> {
+    const recipe = await getRecipe(params.id);
 
     if (!recipe) {
-        return (
-            <div>Recette introuvable</div>
-        );
+        return {
+            title: 'Recette non trouvée - Cookify',
+        };
     }
-    return (
-        <main className="p-6 h-full">
-            <h1 className="text-2xl font-bold mb-4">
-                Détail de la recette
-            </h1>
-            <RecipeDetailWrapper recipe={recipe} />
-        </main>
-    );
 
+    return {
+        title: `${recipe.name} - Cookify`,
+        description: recipe.description || `Recette ${recipe.name} avec ${recipe.ingredients.length} ingrédients`,
+        openGraph: {
+            title: recipe.name,
+            description: recipe.description,
+            images: recipe.image ? [recipe.image] : [],
+        },
+    };
+}
+
+// Composant principal de la page
+export default async function RecipeDetailPage({
+                                                   params
+                                               }: {
+    params: { id: string }
+}) {
+    // Récupération des données côté serveur (SSG)
+    const recipe = await getRecipe(params.id);
+
+    if (!recipe) {
+        notFound();
+    }
+
+    // Calcul du temps total
+    const totalTime = recipe.prep_time + recipe.cook_time;
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <div className="max-w-4xl mx-auto px-4 py-8">
+
+                {/* En-tête avec image et infos principales */}
+                <RecipeHeader
+                    recipe={recipe}
+                    totalTime={totalTime}
+                />
+
+                {/* Actions rapides (modifier, partager, etc.) */}
+                <RecipeActions
+                    recipeId={recipe.id!}
+                    recipeName={recipe.name}
+                />
+
+                {/* Contenu principal en grid responsive */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+
+                    {/* Colonne de gauche : Ingrédients et nutrition */}
+                    <div className="lg:col-span-1 space-y-6">
+                        <RecipeIngredients
+                            ingredients={recipe.ingredients}
+                            servings={recipe.servings}
+                        />
+
+                        <RecipeNutrition
+                            ingredients={recipe.ingredients}
+                            servings={recipe.servings}
+                            totalCalories={recipe.calories}
+                        />
+                    </div>
+
+                    {/* Colonne de droite : Étapes de préparation */}
+                    <div className="lg:col-span-2">
+                        <RecipeSteps
+                            steps={recipe.steps}
+                            prepTime={recipe.prep_time}
+                            cookTime={recipe.cook_time}
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }

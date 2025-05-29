@@ -11,11 +11,11 @@ export interface ProvidersProps {
     themeProps?: any;
 }
 
-export function Providers({ children, themeProps }: ProvidersProps) {
+export function Providers({ children, themeProps }: Readonly<ProvidersProps>) {
     const router = useRouter();
 
     return (
-        <HeroUIProvider navigate={router.push}>
+        <HeroUIProvider navigate={router.push} locale={"fr-FR"}>
             <NextThemesProvider {...themeProps}>
                 <AuthProvider>
                     {children}
