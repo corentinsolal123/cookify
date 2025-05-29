@@ -320,8 +320,8 @@ export default function RecipeEditForm({
                     />
 
                     {/* Résumé de la recette */}
-                    <div className="bg-white rounded-lg shadow-md p-6">
-                        <h3 className="font-semibold text-gray-900 mb-4">Résumé</h3>
+                    <Card className="p-6">
+                        <h3 className="font-semibold mb-4">Résumé</h3>
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-gray-600">Ingrédients:</span>
@@ -344,7 +344,7 @@ export default function RecipeEditForm({
                                 <span className="font-medium">{formData.servings}</span>
                             </div>
                         </div>
-                    </div>
+                    </Card>
                 </div>
             </div>
         </div>

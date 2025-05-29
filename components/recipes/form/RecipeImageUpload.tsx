@@ -4,6 +4,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Upload, X, Image as ImageIcon, Loader2, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
+import { Card } from "@heroui/card";
 
 interface RecipeImageUploadProps {
     currentImage?: string;
@@ -15,7 +16,7 @@ export default function RecipeImageUpload({
                                               currentImage,
                                               recipeName,
                                               onChange
-                                          }: RecipeImageUploadProps) {
+                                          }: Readonly<RecipeImageUploadProps>) {
     const [dragActive, setDragActive] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -198,8 +199,8 @@ export default function RecipeImageUpload({
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+        <Card className="p-6">
+            <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
                 <ImageIcon className="w-5 h-5 text-blue-500" />
                 Photo de la recette
             </h3>
@@ -315,6 +316,6 @@ export default function RecipeImageUpload({
                     <li>• Montre la texture et les couleurs</li>
                 </ul>
             </div>
-        </div>
+        </Card>
     );
 }

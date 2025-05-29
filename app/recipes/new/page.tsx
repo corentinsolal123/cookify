@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function NewRecipePage() {
     return (
         <div className="min-h-screen">
-            <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="max-w-7xl mx-auto px-4 py-8">
 
                 {/* En-tête de la page */}
                 <div className="mb-8">
