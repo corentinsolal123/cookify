@@ -55,6 +55,13 @@ The project uses Jest and React Testing Library for testing. The configuration i
 - `jest.config.js` - Main Jest configuration
 - `jest.setup.js` - Setup file for Jest
 
+Before running tests, make sure to install the required testing dependencies:
+```bash
+npm install --save-dev jest @testing-library/react @testing-library/jest-dom jest-environment-jsdom
+```
+
+Note: The jest.config.js file references a package called 'next-jest', but this package doesn't seem to be available in the npm registry. You may need to check with the project maintainers for the correct package name or a custom implementation.
+
 ### Running Tests
 Run all tests:
 ```bash
@@ -87,8 +94,9 @@ describe('ComponentName', () => {
 ```
 
 #### API Route Tests
-For testing API routes, use the `next-test-api-route-handler` package:
+There are two approaches for testing API routes:
 
+##### Option 1: Using the `next-test-api-route-handler` package
 ```typescript
 // app/api/__tests__/route-name.test.ts
 import { testApiHandler } from 'next-test-api-route-handler';
@@ -107,6 +115,43 @@ describe('API Route: /api/route-name', () => {
         }));
       },
     });
+  });
+});
+```
+
+##### Option 2: Directly calling the handler functions
+```typescript
+// app/api/__tests__/route.test.ts
+import { NextRequest } from 'next/server';
+import { GET, POST } from '../route';
+
+// Mock dependencies
+jest.mock('@/lib/dbConnect', () => jest.fn());
+jest.mock('@/models/Recipe', () => ({
+  find: jest.fn(),
+  create: jest.fn(),
+}));
+
+describe('Recipes API', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('GET returns recipes successfully', async () => {
+    // Mock the Recipe.find method
+    const mockRecipes = [{ _id: '1', title: 'Recipe 1' }];
+    require('@/models/Recipe').find.mockResolvedValue(mockRecipes);
+
+    // Create a mock request
+    const request = new NextRequest('http://localhost:3000/api/recipes');
+
+    // Call the handler directly
+    const response = await GET(request);
+    const data = await response.json();
+
+    // Verify the response
+    expect(response.status).toBe(200);
+    expect(data).toEqual(mockRecipes);
   });
 });
 ```
@@ -134,6 +179,41 @@ global.fetch = jest.fn(() =>
     json: () => Promise.resolve({ /* mock response */ }),
   })
 ) as jest.Mock;
+```
+
+#### Utility Function Tests
+For utility functions, create test files in a `__tests__` directory adjacent to the utility file. Here's an example of testing string utility functions:
+
+```typescript
+// lib/__tests__/stringUtils.test.ts
+import { capitalizeFirstLetter, truncateString } from '../stringUtils';
+
+describe('String Utilities', () => {
+  describe('capitalizeFirstLetter', () => {
+    it('should capitalize the first letter of a string', () => {
+      expect(capitalizeFirstLetter('hello')).toBe('Hello');
+      expect(capitalizeFirstLetter('world')).toBe('World');
+    });
+
+    it('should return an empty string when given an empty string', () => {
+      expect(capitalizeFirstLetter('')).toBe('');
+    });
+
+    it('should handle strings that are already capitalized', () => {
+      expect(capitalizeFirstLetter('Hello')).toBe('Hello');
+    });
+  });
+
+  describe('truncateString', () => {
+    it('should truncate a string if it exceeds the maximum length', () => {
+      expect(truncateString('Hello world', 5)).toBe('Hello...');
+    });
+
+    it('should not truncate a string if it is shorter than the maximum length', () => {
+      expect(truncateString('Hello', 10)).toBe('Hello');
+    });
+  });
+});
 ```
 
 ## Additional Development Information

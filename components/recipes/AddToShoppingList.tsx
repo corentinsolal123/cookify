@@ -9,7 +9,7 @@ interface AddToShoppingListProps {
     recipeName: string;
 }
 
-export default function AddToShoppingList({ recipeId, recipeName }: AddToShoppingListProps) {
+export default function AddToShoppingList({ recipeId, recipeName }: Readonly<AddToShoppingListProps>) {
     const { status } = useSession();
     const [servings, setServings] = useState(1);
     const [loading, setLoading] = useState(false);

@@ -1,6 +1,5 @@
 // app/loading.tsx
-import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
-import { Divider } from "@heroui/divider";
+import { Card, CardBody, CardHeader } from "@heroui/card";
 
 export default function Loading() {
     return (
@@ -13,7 +12,7 @@ export default function Loading() {
                     </div>
 
                     <div className="grid grid-cols-3 gap-4 mt-4">
-                        {[1,2,3].map(i => (
+                        {[1, 2, 3].map(i => (
                             <div key={i} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
                                 <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
                                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>

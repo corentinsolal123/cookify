@@ -1,62 +1,55 @@
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
+import { router } from "next/client";
 
 export default function AuthStatus() {
-    const { data: session, status } = useSession();
+    const { signOut, user } = useAuth();
 
-    // Skeleton plus joli pendant le chargement
-    if (status === "loading") {
-        return (
-            <div className="flex gap-2.5">
-                <div className="h-9 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                <div className="h-9 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            </div>
-        );
-    }
+    const handleLogout = async () => {
+        const { error } = await signOut();
+        if (!error) {
+            await router.push("/auth/login");
+        }
+    };
 
-    if (session) {
+    if (user) {
         return (
             <div className="flex items-center gap-2.5">
-                <span className="text-sm text-gray-700 dark:text-gray-300 hidden sm:block">
-                    Salut {session.user?.name} !
-                </span>
                 <Button
                     color="default"
                     variant="solid"
                     size="sm"
-                    onPress={() =>
-                        signOut({ redirect: true, callbackUrl: "/" })
-                    }
+                    onPress={handleLogout}
                 >
                     Déconnexion
                 </Button>
             </div>
         );
+    } else {
+        return (
+            <div className="flex gap-2.5">
+                <Button
+                    as={Link}
+                    color="default"
+                    href="/auth/login"
+                    variant="solid"
+                    size="sm"
+                >
+                    Connexion
+                </Button>
+                <Button
+                    as={Link}
+                    href="/auth/signup"
+                    variant="solid"
+                    size="sm"
+                    color="primary"
+                >
+                    Inscription
+                </Button>
+            </div>
+        );
     }
-
-    return (
-        <div className="flex gap-2.5">
-            <Button
-                as={Link}
-                color="default"
-                href="/login"
-                variant="solid"
-                size="sm"
-            >
-                Connexion
-            </Button>
-            <Button
-                as={Link}
-                href="/register"
-                variant="solid"
-                size="sm"
-                color="primary"
-            >
-                Inscription
-            </Button>
-        </div>
-    );
 }

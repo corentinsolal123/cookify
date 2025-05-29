@@ -1,33 +1,26 @@
-import { IngredientData } from "@/types/ingredient";
+// types/shoppingList.ts
 import { RecipeData } from "@/types/recipe";
 
 export interface ShoppingListItemData {
-    _id?: string;
-    ingredient?: string; // ID of the ingredient
+    id?: string; // UUID au lieu de _id
+    shopping_list_id?: string; // Relation avec la liste
+    ingredient_id?: string; // ID optionnel de l'ingrédient référence
     name: string;
     quantity: number;
     unit: string;
     checked: boolean;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export interface ShoppingListData {
-    _id?: string;
-    userId: string;
+    id?: string; // UUID au lieu de _id
+    user_id?: string; // Relation avec l'utilisateur
     name: string;
-    items: ShoppingListItemData[];
-    recipes: string[] | RecipeData[]; // Array of recipe IDs or full recipe objects
-    createdAt?: Date;
-    updatedAt?: Date;
-}
-
-// Request types for API endpoints
-export interface AddRecipeToShoppingListRequest {
-    recipeId: string;
-    servings?: number; // Optional servings multiplier
-}
-
-export interface UpdateShoppingListItemRequest {
-    itemId: string;
-    checked?: boolean;
-    quantity?: number;
+    recipes: string[]; // Array d'UUIDs de recettes
+    created_at?: string;
+    updated_at?: string;
+    // Relations chargées dynamiquement
+    items?: ShoppingListItemData[];
+    recipe_details?: RecipeData[];
 }

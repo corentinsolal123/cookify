@@ -11,6 +11,7 @@ export async function fetchRecipesAPI(): Promise<RecipeData[]> {
 
     return res.json();
 }
+
 // Pour récupérer la liste des recettes
 export async function fetchIngredientsAPI(): Promise<IngredientData[]> {
     const res = await fetch("/api/ingredients");

@@ -1,6 +1,5 @@
 // components/navbar/Navbar.tsx (Server Component)
 import { Kbd } from "@heroui/kbd";
-import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import {
     Navbar as HeroUINavbar,
@@ -8,15 +7,14 @@ import {
     NavbarContent,
     NavbarItem,
     NavbarMenu,
-    NavbarMenuItem,
     NavbarMenuToggle
 } from "@heroui/navbar";
 import NextLink from "next/link";
 import { siteConfig } from "@/config/site";
 import { Logo, SearchIcon } from "@/components/global/Icons";
-import AuthStatus from "@/components/auth/AuthStatus";
 import { ThemeSwitch } from "@/components/global/Theme-switch";
-import { NavLinks } from "@/components/navbar/NavLinks"; // ← Nouveau composant client
+import { NavLinks } from "@/components/navbar/NavLinks";
+import AuthStatus from "@/components/auth/AuthStatus";
 
 export const Navbar = () => {
     const searchInput = (
@@ -53,36 +51,16 @@ export const Navbar = () => {
                     </NextLink>
                 </NavbarBrand>
 
-                {/* ✅ Partie client séparée pour les liens actifs */}
                 <NavLinks />
             </NavbarContent>
 
             <NavbarContent className="hidden sm:flex basis-1/5 sm:basis-full" justify="end">
                 <NavbarItem className="hidden lg:flex w-64">{searchInput}</NavbarItem>
                 <NavbarItem className="ml-2">
-                    <AuthStatus /> {/* ✅ Déjà client */}
+                    <AuthStatus />
                 </NavbarItem>
                 <NavbarItem className="ml-2">
-                    <ThemeSwitch /> {/* ✅ Probablement client */}
-                </NavbarItem>
-                <NavbarItem className="hidden md:flex ml-2">
-                    <Button
-                        as={NextLink}
-                        href="/recipes/create"
-                        color="primary"
-                        variant="flat"
-                        radius="full"
-                        startContent={
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                                 strokeLinejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                        }
-                    >
-                        New Recipe
-                    </Button>
+                    <ThemeSwitch />
                 </NavbarItem>
             </NavbarContent>
 
@@ -95,26 +73,7 @@ export const Navbar = () => {
                 <div className="mx-4 mt-2 mb-6">
                     {searchInput}
                 </div>
-                {/* ✅ Ici aussi, composant client pour les liens actifs */}
                 <NavLinks isMobile />
-                <NavbarMenuItem className="mt-6">
-                    <Button
-                        as={NextLink}
-                        href="/recipes/create"
-                        color="primary"
-                        className="w-full"
-                        startContent={
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                                 strokeLinejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                        }
-                    >
-                        New Recipe
-                    </Button>
-                </NavbarMenuItem>
             </NavbarMenu>
         </HeroUINavbar>
     );

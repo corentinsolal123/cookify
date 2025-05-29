@@ -1,0 +1,33 @@
+// lib/services/searchService.ts
+import { SearchResponse } from "@/types/api";
+import { RecipeData } from "@/types/recipe";
+import { SearchFilters } from "@/types/search";
+import { supabase } from "@/lib/supabase";
+
+export class SearchService {
+    // Utiliser la fonction SQL personnalisée pour une recherche avancée
+    static async advancedSearch(filters: SearchFilters): Promise<SearchResponse<RecipeData>> {
+        const { data, error } = await supabase.rpc("search_recipes", {
+            search_query: filters.search || null,
+            filter_tags: filters.tags || null,
+            filter_difficulty: filters.difficulty || null,
+            max_prep_time: filters.maxPrepTime || null,
+            max_cook_time: filters.maxCookTime || null,
+            page_limit: filters.limit || 20,
+            page_offset: ((filters.page || 1) - 1) * (filters.limit || 20)
+        });
+
+        if (error) throw error;
+
+        const results = data || [];
+        const totalCount = results.length > 0 ? results[0].total_count : 0;
+
+        return {
+            data: results.map(({ total_count, ...recipe }) => recipe),
+            total_count: totalCount,
+            page: filters.page || 1,
+            limit: filters.limit || 20,
+            has_more: totalCount > ((filters.page || 1) * (filters.limit || 20))
+        };
+    }
+}

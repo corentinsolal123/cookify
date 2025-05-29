@@ -1,34 +1,34 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { Card, Spinner, Checkbox, Button, Input } from "@heroui/react";
-import { ShoppingListData, ShoppingListItemData } from "@/types/shoppingList";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth/AuthProvider";
+import { Button, Card, Checkbox, Spinner } from "@heroui/react";
+import { ShoppingListData } from "@/types/shoppingList";
 
 export default function ShoppingListPage() {
-    const { data: session, status } = useSession();
+    const { user } = useAuth();
     const [shoppingList, setShoppingList] = useState<ShoppingListData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (status === "authenticated") {
+        if (user) {
             fetchShoppingList();
-        } else if (status === "unauthenticated") {
+        } else {
             setLoading(false);
             setError("Vous devez être connecté pour accéder à votre liste de courses.");
         }
-    }, [status]);
+    }, [user]);
 
     const fetchShoppingList = async () => {
         try {
             setLoading(true);
             const response = await fetch("/api/shopping-list");
-            
+
             if (!response.ok) {
                 throw new Error("Erreur lors de la récupération de la liste de courses");
             }
-            
+
             const data = await response.json();
             setShoppingList(data);
             setLoading(false);
@@ -44,7 +44,7 @@ export default function ShoppingListPage() {
             const response = await fetch(`/api/shopping-list/items`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ itemId, checked }),
+                body: JSON.stringify({ itemId, checked })
             });
 
             if (!response.ok) {
@@ -53,14 +53,16 @@ export default function ShoppingListPage() {
 
             // Update local state
             setShoppingList(prevList => {
-                if (!prevList) return null;
-                
-                return {
-                    ...prevList,
-                    items: prevList.items.map(item => 
-                        item._id === itemId ? { ...item, checked } : item
-                    )
-                };
+                if (!prevList) {
+                    return null;
+                } else {
+                    return {
+                        ...prevList,
+                        items: prevList.items?.map(item =>
+                            item.id === itemId ? { ...item, checked } : item
+                        )
+                    };
+                }
             });
         } catch (error) {
             console.error("Erreur:", error);
@@ -75,7 +77,7 @@ export default function ShoppingListPage() {
 
         try {
             const response = await fetch(`/api/shopping-list`, {
-                method: "DELETE",
+                method: "DELETE"
             });
 
             if (!response.ok) {
@@ -120,25 +122,25 @@ export default function ShoppingListPage() {
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-6">Ma Liste de Courses</h1>
-            
-            {shoppingList && shoppingList.items.length > 0 ? (
+
+            {shoppingList?.items?.length && shoppingList?.items?.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-2">
                         <Card isBlurred className="p-6">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-semibold">Ingrédients</h2>
                                 <div className="flex gap-2">
-                                    <Button 
-                                        size="sm" 
-                                        variant="flat" 
+                                    <Button
+                                        size="sm"
+                                        variant="flat"
                                         color="primary"
                                         onPress={handlePrintList}
                                     >
                                         Imprimer
                                     </Button>
-                                    <Button 
-                                        size="sm" 
-                                        variant="flat" 
+                                    <Button
+                                        size="sm"
+                                        variant="flat"
                                         color="danger"
                                         onPress={handleClearList}
                                     >
@@ -146,16 +148,17 @@ export default function ShoppingListPage() {
                                     </Button>
                                 </div>
                             </div>
-                            
+
                             <ul className="space-y-2 print:text-black">
-                                {shoppingList.items.map((item) => (
-                                    <li key={item._id} className="flex items-center p-2 border-b">
+                                {shoppingList.items?.map((item) => (
+                                    <li key={item.id} className="flex items-center p-2 border-b">
                                         <Checkbox
                                             isSelected={item.checked}
-                                            onValueChange={(checked) => handleItemCheck(item._id!, checked)}
+                                            onValueChange={(checked) => handleItemCheck(item.id!, checked)}
                                             className="print:hidden"
                                         />
-                                        <span className={`ml-2 flex-1 ${item.checked ? 'line-through text-gray-400' : ''}`}>
+                                        <span
+                                            className={`ml-2 flex-1 ${item.checked ? "line-through text-gray-400" : ""}`}>
                                             {item.name} - {item.quantity} {item.unit}
                                         </span>
                                     </li>
@@ -163,15 +166,16 @@ export default function ShoppingListPage() {
                             </ul>
                         </Card>
                     </div>
-                    
+
                     <div>
                         <Card isBlurred className="p-6">
                             <h2 className="text-xl font-semibold mb-4">Recettes incluses</h2>
                             {Array.isArray(shoppingList.recipes) && shoppingList.recipes.length > 0 ? (
                                 <ul className="space-y-2">
                                     {shoppingList.recipes.map((recipe: any) => (
-                                        <li key={typeof recipe === 'string' ? recipe : recipe._id} className="p-2 border-b">
-                                            {typeof recipe === 'string' ? recipe : recipe.name}
+                                        <li key={typeof recipe === "string" ? recipe : recipe._id}
+                                            className="p-2 border-b">
+                                            {typeof recipe === "string" ? recipe : recipe.name}
                                         </li>
                                     ))}
                                 </ul>

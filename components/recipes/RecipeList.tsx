@@ -8,7 +8,7 @@ interface RecipeListProps {
     recipes: RecipeData[];
 }
 
-export default function RecipeList({ recipes }: RecipeListProps) {
+export default function RecipeList({ recipes }: Readonly<RecipeListProps>) {
     if (recipes.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-16 px-4">
@@ -60,7 +60,7 @@ export default function RecipeList({ recipes }: RecipeListProps) {
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                 {recipes.map((recipe) => (
-                    <RecipeCard key={recipe._id} recipe={recipe} />
+                    <RecipeCard key={recipe.id} recipe={recipe} />
                 ))}
             </div>
         </div>
