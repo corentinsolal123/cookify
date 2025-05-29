@@ -1,5 +1,5 @@
 // lib/services/recipeServices.ts - CLIENT ONLY
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { RecipeData } from "@/types/recipe";
 import { SearchFilters } from "@/types/search";
 
@@ -11,11 +11,11 @@ export interface RecipesResult {
 }
 
 // Client pour les composants client
-const getSupabaseClient = () => createClientComponentClient()
+const getSupabaseClient = () => createClient()
 
 // Recherche avec filtres (client)
 export async function searchRecipes(filters: SearchFilters = {}): Promise<RecipesResult> {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
 
     let query = supabase
         .from('recipes')
@@ -59,8 +59,8 @@ export async function searchRecipes(filters: SearchFilters = {}): Promise<Recipe
     }
 
     // Pagination
-    const limit = filters.limit || 12
-    const page = filters.page || 1
+    const limit = filters.limit ?? 12
+    const page = filters.page ?? 1
     const offset = (page - 1) * limit
 
     query = query
@@ -76,15 +76,15 @@ export async function searchRecipes(filters: SearchFilters = {}): Promise<Recipe
 
     return {
         recipes,
-        total: count || 0,
+        total: count ?? 0,
         page,
-        totalPages: Math.ceil((count || 0) / limit)
+        totalPages: Math.ceil((count ?? 0) / limit)
     }
 }
 
 // Récupérer une recette par ID (client)
 export async function getRecipeById(id: string): Promise<RecipeData | null> {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
 
     const { data, error } = await supabase
         .from('recipes')
@@ -102,7 +102,7 @@ export async function getRecipeById(id: string): Promise<RecipeData | null> {
 
 // Créer une recette (client)
 export async function createRecipe(recipe: Omit<RecipeData, 'id'>): Promise<RecipeData> {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
 
     const { data, error } = await supabase
         .from('recipes')
@@ -117,7 +117,7 @@ export async function createRecipe(recipe: Omit<RecipeData, 'id'>): Promise<Reci
             servings: recipe.servings,
             steps: recipe.steps,
             ingredients: recipe.ingredients,
-            tags: recipe.tags || [],
+            tags: recipe.tags ?? [],
             image: recipe.image
         }])
         .select()
@@ -130,7 +130,7 @@ export async function createRecipe(recipe: Omit<RecipeData, 'id'>): Promise<Reci
 
 // Mettre à jour une recette (client)
 export async function updateRecipe(id: string, updates: Partial<RecipeData>): Promise<RecipeData> {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
 
     const updateData: any = {}
     if (updates.name !== undefined) updateData.name = updates.name
@@ -160,7 +160,7 @@ export async function updateRecipe(id: string, updates: Partial<RecipeData>): Pr
 
 // Supprimer une recette (client)
 export async function deleteRecipe(id: string): Promise<void> {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
 
     const { error } = await supabase
         .from('recipes')
@@ -172,7 +172,7 @@ export async function deleteRecipe(id: string): Promise<void> {
 
 // Récupérer les recettes de l'utilisateur connecté (client)
 export async function getUserRecipes(): Promise<RecipeData[]> {
-    const supabase = getSupabaseClient()
+    const supabase = await getSupabaseClient()
 
     const { data, error } = await supabase
         .from('recipes')
@@ -189,16 +189,16 @@ function mapRecipeFromSupabase(data: any): RecipeData {
     return {
         id: data.id,
         name: data.name,
-        description: data.description || '',
+        description: data.description ?? '',
         difficulty: data.difficulty,
         prep_time: data.prep_time,
         cook_time: data.cook_time,
-        calories: data.calories || 0,
+        calories: data.calories ?? 0,
         creator: data.creator,
         servings: data.servings,
-        steps: data.steps || [],
-        ingredients: data.ingredients || [],
-        tags: data.tags || [],
+        steps: data.steps ?? [],
+        ingredients: data.ingredients ?? [],
+        tags: data.tags ?? [],
         image: data.image
     }
 }

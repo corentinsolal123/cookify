@@ -1,13 +1,13 @@
 // lib/services/tagServices.ts - CLIENT ONLY
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from '@/lib/supabase/server'
 import { TagData } from "@/types/tag";
 
 // Client pour les composants client
-const getSupabaseClient = () => createClientComponentClient();
+const getSupabaseClient = () => createClient();
 
 // Pour les composants client
 export async function getAllTags(): Promise<TagData[]> {
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
     const { data, error } = await supabase
         .from("tags")
@@ -16,12 +16,12 @@ export async function getAllTags(): Promise<TagData[]> {
 
     if (error) throw error;
 
-    return (data || []).map(mapTagFromSupabase);
+    return (data ?? []).map(mapTagFromSupabase);
 }
 
 // Récupérer par catégorie
 export async function getTagsByCategory(category: TagData["category"]): Promise<TagData[]> {
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
     const { data, error } = await supabase
         .from("tags")
@@ -31,12 +31,12 @@ export async function getTagsByCategory(category: TagData["category"]): Promise<
 
     if (error) throw error;
 
-    return (data || []).map(mapTagFromSupabase);
+    return (data ?? []).map(mapTagFromSupabase);
 }
 
 // Créer un tag
 export async function createTag(tag: Omit<TagData, "id" | "createdAt" | "updatedAt">): Promise<TagData> {
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
 
     const { data, error } = await supabase
         .from("tags")
