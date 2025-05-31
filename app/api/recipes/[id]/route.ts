@@ -3,13 +3,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getRecipeByIdServer } from '@/lib/services/server/recipeServices';
 import { updateRecipe, deleteRecipe } from '@/lib/services/client/recipeServices';
 
+// ✅ Next.js 15: params est maintenant une Promise
+interface RouteParams {
+    params: Promise<{ id: string }>;
+}
+
 // GET - Récupérer une recette par ID
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: RouteParams // ✅ Type corrigé
 ) {
     try {
-        const { id } = params;
+        const { id } = await params; // ✅ await obligatoire en Next.js 15
 
         if (!id) {
             return NextResponse.json(
@@ -46,10 +51,10 @@ export async function GET(
 // PUT - Mettre à jour une recette
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: RouteParams // ✅ Type corrigé
 ) {
     try {
-        const { id } = params;
+        const { id } = await params; // ✅ await obligatoire
         const updates = await request.json();
 
         if (!id) {
@@ -92,7 +97,7 @@ export async function PUT(
         }
 
         // Mise à jour via le service Supabase
-        const updatedRecipe = await updateRecipe(id, enrichedUpdates);
+        const updatedRecipe = await updateRecipe(enrichedUpdates);
 
         return NextResponse.json(updatedRecipe);
 
@@ -112,10 +117,10 @@ export async function PUT(
 // DELETE - Supprimer une recette
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: RouteParams // ✅ Type corrigé
 ) {
     try {
-        const { id } = params;
+        const { id } = await params; // ✅ await obligatoire
 
         if (!id) {
             return NextResponse.json(
@@ -154,8 +159,28 @@ export async function DELETE(
     }
 }
 
+// ✅ Types pour la validation - Amélioration avec des interfaces
+interface RecipeIngredient {
+    name: string;
+    quantityPerServing: number;
+    unit: string;
+    calories?: number;
+}
+
+interface PartialRecipeData {
+    name?: string;
+    creator?: string;
+    difficulty?: 'facile' | 'moyen' | 'difficile';
+    prep_time?: number;
+    cook_time?: number;
+    servings?: number;
+    ingredients?: RecipeIngredient[];
+    steps?: string[];
+    [key: string]: any; // Pour permettre d'autres propriétés
+}
+
 // Fonction de validation partielle (pour les mises à jour)
-function validatePartialRecipeData(data: any): { isValid: boolean; errors: string[] } {
+function validatePartialRecipeData(data: PartialRecipeData): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     if (data.name !== undefined) {
@@ -199,7 +224,7 @@ function validatePartialRecipeData(data: any): { isValid: boolean; errors: strin
             errors.push('Au moins un ingrédient est requis');
         } else {
             // Validation des ingrédients
-            data.ingredients.forEach((ingredient: any, index: number) => {
+            data.ingredients.forEach((ingredient, index) => {
                 if (!ingredient.name || typeof ingredient.name !== 'string') {
                     errors.push(`Ingrédient ${index + 1}: nom requis`);
                 }
@@ -226,7 +251,7 @@ function validatePartialRecipeData(data: any): { isValid: boolean; errors: strin
 }
 
 // Fonction pour calculer les calories totales
-function calculateTotalCalories(ingredients: any[]): number {
+function calculateTotalCalories(ingredients: RecipeIngredient[]): number {
     return Math.round(ingredients.reduce((total, ingredient) => {
         const calories = ingredient.calories || 0;
         const quantity = ingredient.quantityPerServing || 0;

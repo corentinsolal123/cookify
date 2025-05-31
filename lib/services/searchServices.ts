@@ -2,7 +2,7 @@
 import { SearchResponse } from "@/types/api";
 import { RecipeData } from "@/types/recipe";
 import { SearchFilters } from "@/types/search";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 
 // Définis le type de retour de ta fonction RPC
 type SearchRecipeResult = RecipeData & {
@@ -11,7 +11,7 @@ type SearchRecipeResult = RecipeData & {
 
 export class SearchService {
     static async advancedSearch(filters: SearchFilters): Promise<SearchResponse<RecipeData>> {
-        const { data, error } = await supabase.rpc("search_recipes", {
+        const { data, error } = await createClient().rpc("search_recipes", {
             search_query: filters.search ?? null,
             filter_tags: filters.tags ?? null,
             filter_difficulty: filters.difficulty ?? null,

@@ -1,21 +1,53 @@
-import { IngredientData } from "@/types/ingredient";
-
 // types/recipe.ts
+import { IngredientData } from './ingredient';
+
 export interface RecipeData {
-    id?: string; // UUID au lieu de _id
-    user_id?: string; // Ajouté pour la relation avec auth.users
+    id: string;
+    user_id?: string;                    // ✅ Ajouté
     name: string;
     description?: string;
-    difficulty: 'facile' | 'moyen' | 'difficile'; // Plus strict
-    prep_time: number; // en minutes
-    cook_time: number; // en minutes
-    calories?: number;
+    difficulty: "facile" | "moyen" | "difficile";
+    prep_time: number;                  // > 0 requis
+    cook_time: number;                  // >= 0 autorisé
+    calories: number;                   // ✅ Calculé automatiquement
     creator: string;
-    steps: string[];
+    steps: string[];                    // ✅ ARRAY pas jsonb
     servings: number;
-    ingredients: IngredientData[];
-    tags?: string[]; // Array de noms de tags
+    ingredients: IngredientData[];      // ✅ JSONB
+    tags: string[];                     // ✅ ARRAY pas relation
     image?: string;
     created_at?: string;
     updated_at?: string;
+}
+
+// Type pour la création (sans les champs auto-générés)
+export interface CreateRecipeInput {
+    name: string;
+    description?: string;
+    difficulty: "facile" | "moyen" | "difficile";
+    prep_time: number;                  // Doit être > 0
+    cook_time: number;                  // Peut être 0
+    servings: number;
+    creator: string;
+    ingredients: IngredientData[];
+    steps: string[];
+    tags: string[];
+    image?: string;
+    // user_id sera ajouté automatiquement depuis l'auth
+    // calories sera calculé automatiquement
+}
+
+// Type pour la mise à jour
+export interface UpdateRecipeInput extends Partial<CreateRecipeInput> {
+    id: string;
+}
+
+// Type pour les filtres de recherche
+export interface RecipeFilters {
+    difficulty?: "facile" | "moyen" | "difficile";
+    maxPrepTime?: number;
+    maxCookTime?: number;
+    maxCalories?: number;
+    tags?: string[];
+    ingredients?: string[];
 }

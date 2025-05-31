@@ -6,6 +6,10 @@ import RecipeEditForm from '@/components/recipes/form/RecipeEditForm';
 
 import { getRecipeByIdServer } from '@/lib/services/server/recipeServices';
 
+interface PageProps {
+    params: Promise<{ id: string }>; // Promise maintenant !
+}
+
 // Fonction pour récupérer une recette existante (pour modification)
 async function getRecipe(id: string): Promise<RecipeData | null> {
     // Si l'ID est "new", on crée une nouvelle recette
@@ -25,17 +29,17 @@ async function getRecipe(id: string): Promise<RecipeData | null> {
 // Métadonnées dynamiques selon le contexte (création vs modification)
 export async function generateMetadata({
                                            params
-                                       }: {
-    params: { id: string }
-}): Promise<Metadata> {
-    if (params.id === 'new') {
+                                       }: PageProps): Promise<Metadata> { // ✅ Type corrigé
+    const { id } = await params; // ✅ await obligatoire
+
+    if (id === 'new') {
         return {
             title: 'Nouvelle recette - Cookify',
             description: 'Créer une nouvelle recette sur Cookify',
         };
     }
 
-    const recipe = await getRecipe(params.id);
+    const recipe = await getRecipe(id);
 
     return {
         title: recipe
@@ -50,19 +54,19 @@ export async function generateMetadata({
 // Composant principal de la page d'édition
 export default async function RecipeEditPage({
                                                  params
-                                             }: {
-    params: { id: string }
-}) {
+                                             }: Readonly<PageProps>) {
+    const { id } = await params;
+
     // Récupération de la recette existante (si modification)
-    const existingRecipe = await getRecipe(params.id);
+    const existingRecipe = await getRecipe(id);
 
     // Si on essaie de modifier une recette qui n'existe pas
-    if (params.id !== 'new' && !existingRecipe) {
+    if (id !== 'new' && !existingRecipe) {
         notFound();
     }
 
     // Déterminer le mode (création ou modification)
-    const isCreating = params.id === 'new';
+    const isCreating = id === 'new';
     const pageTitle = isCreating ? 'Créer une nouvelle recette' : `Modifier ${existingRecipe?.name}`;
 
     return (
@@ -87,7 +91,7 @@ export default async function RecipeEditPage({
                 <RecipeEditForm
                     initialData={existingRecipe}
                     isCreating={isCreating}
-                    recipeId={params.id}
+                    recipeId={id} // ✅ id directement maintenant
                 />
             </div>
         </div>

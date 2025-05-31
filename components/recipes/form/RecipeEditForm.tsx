@@ -1,22 +1,24 @@
 // components/recipes/RecipeEditForm.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, CheckCircle2, Save, X } from "lucide-react";
-import { RecipeData } from "@/types/recipe";
+import { RecipeData, CreateRecipeInput, UpdateRecipeInput } from "@/types/recipe";
 import { IngredientData } from "@/types/ingredient";
+import { createRecipe, updateRecipe } from "@/lib/services/client/recipeServices";
 import RecipeBasicInfo from "@/components/recipes/form/RecipeBasicInfo";
 import RecipeIngredientsEditor from "@/components/recipes/form/RecipeIngredientsEditor";
 import RecipeStepsEditor from "@/components/recipes/form/RecipeStepsEditor";
 import RecipeImageUpload from "@/components/recipes/form/RecipeImageUpload";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
+import { Chip } from "@heroui/chip";
 
 interface RecipeEditFormProps {
     initialData: RecipeData | null;
     isCreating: boolean;
-    recipeId: string;
+    recipeId?: string;
 }
 
 // Type pour gérer l'état du formulaire
@@ -41,8 +43,8 @@ const getInitialFormState = (data: RecipeData | null): FormState => {
             name: "",
             description: "",
             difficulty: "facile",
-            prep_time: 0,
-            cook_time: 0,
+            prep_time: 1,           // ✅ Doit être > 0 selon contrainte DB
+            cook_time: 0,           // ✅ Peut être 0 selon contrainte DB
             servings: 4,
             creator: "",
             ingredients: [],
@@ -74,11 +76,13 @@ export default function RecipeEditForm({
                                        }: Readonly<RecipeEditFormProps>) {
     const router = useRouter();
 
-    // État du formulaire
+    // États
     const [formData, setFormData] = useState<FormState>(getInitialFormState(initialData));
-    const [loading, setSaving] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    // Utilisation de useTransition pour une meilleure UX (nouveau hook Next.js)
+    const [isPending, startTransition] = useTransition();
     const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
     // Fonction pour mettre à jour les données du formulaire
@@ -86,103 +90,148 @@ export default function RecipeEditForm({
         setFormData(prev => ({ ...prev, ...updates }));
         setHasUnsavedChanges(true);
         setSaveStatus("idle");
+
+        // Clear les erreurs relatives aux champs modifiés
+        const updatedFields = Object.keys(updates);
+        setErrors(prev => {
+            const newErrors = { ...prev };
+            updatedFields.forEach(field => delete newErrors[field]);
+            return newErrors;
+        });
     };
 
-    // Validation du formulaire
+    // Validation du formulaire côté client
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
 
+        // Validation des champs requis
         if (!formData.name.trim()) {
             newErrors.name = "Le nom de la recette est requis";
+        } else if (formData.name.length > 100) {
+            newErrors.name = "Le nom ne peut pas dépasser 100 caractères";
         }
 
         if (!formData.creator.trim()) {
             newErrors.creator = "Le nom du créateur est requis";
+        } else if (formData.creator.length > 50) {
+            newErrors.creator = "Le nom du créateur ne peut pas dépasser 50 caractères";
         }
 
+        if (formData.description.length > 500) {
+            newErrors.description = "La description ne peut pas dépasser 500 caractères";
+        }
+
+        // Validation des temps (conforme aux contraintes DB)
+        if (formData.prep_time <= 0) {
+            newErrors.prep_time = "Le temps de préparation doit être supérieur à 0";
+        } else if (formData.prep_time > 999) {
+            newErrors.prep_time = "Le temps de préparation ne peut pas dépasser 999 minutes";
+        }
+
+        if (formData.cook_time < 0) {
+            newErrors.cook_time = "Le temps de cuisson ne peut pas être négatif";
+        } else if (formData.cook_time > 999) {
+            newErrors.cook_time = "Le temps de cuisson ne peut pas dépasser 999 minutes";
+        }
+
+        // Au moins un temps doit être défini
         if (formData.prep_time <= 0 && formData.cook_time <= 0) {
-            newErrors.time = "Au moins un temps (préparation ou cuisson) doit être supérieur à 0";
+            newErrors.time = "Au moins un temps (préparation ou cuisson) doit être défini";
         }
 
+        // Validation des portions
         if (formData.servings <= 0) {
             newErrors.servings = "Le nombre de portions doit être supérieur à 0";
+        } else if (formData.servings > 50) {
+            newErrors.servings = "Le nombre de portions ne peut pas dépasser 50";
         }
 
+        // Validation des ingrédients
         if (formData.ingredients.length === 0) {
             newErrors.ingredients = "Au moins un ingrédient est requis";
+        } else {
+            // Vérifier que tous les ingrédients ont un nom et une quantité
+            const invalidIngredients = formData.ingredients.filter(
+                ingredient => !ingredient.name.trim() || ingredient.quantityPerServing <= 0
+            );
+            if (invalidIngredients.length > 0) {
+                newErrors.ingredients = "Tous les ingrédients doivent avoir un nom et une quantité valide";
+            }
         }
 
-        if (formData.steps.every(step => !step.trim())) {
+        // Validation des étapes
+        const validSteps = formData.steps.filter(step => step.trim());
+        if (validSteps.length === 0) {
             newErrors.steps = "Au moins une étape de préparation est requise";
+        }
+
+        // Validation des tags
+        if (formData.tags.length > 8) {
+            newErrors.tags = "Maximum 8 tags autorisés";
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    // Fonction de sauvegarde
-    const handleSave = async () => {
+    // Fonction de sauvegarde avec useTransition
+    const handleSave = () => {
         if (!validateForm()) {
             return;
         }
 
-        setSaving(true);
         setSaveStatus("saving");
 
-        try {
-            // Préparation des données pour l'API
-            const recipeData: Partial<RecipeData> = {
-                ...formData,
-                steps: formData.steps.filter(step => step.trim() !== ""), // Enlever les étapes vides
-                updated_at: new Date().toISOString()
-            };
+        startTransition(async () => {
+            try {
+                // Préparation des données pour le service
+                const recipeInput: CreateRecipeInput | UpdateRecipeInput = {
+                    ...formData,
+                    steps: formData.steps.filter(step => step.trim() !== ""), // Enlever les étapes vides
+                };
 
-            // Si c'est une création, ajouter created_at
-            if (isCreating) {
-                recipeData.created_at = new Date().toISOString();
+                let savedRecipe: RecipeData;
+
+                if (isCreating) {
+                    // Création d'une nouvelle recette
+                    savedRecipe = await createRecipe(recipeInput as CreateRecipeInput);
+                } else {
+                    // Mise à jour d'une recette existante
+                    if (!recipeId) {
+                        throw new Error("ID de recette manquant pour la mise à jour");
+                    }
+                    savedRecipe = await updateRecipe({
+                        id: recipeId,
+                        ...recipeInput
+                    } as UpdateRecipeInput);
+                }
+
+                // Succès !
+                setSaveStatus("saved");
+                setHasUnsavedChanges(false);
+
+                // Redirection après création avec un délai pour montrer le succès
+                if (isCreating) {
+                    setTimeout(() => {
+                        router.push(`/recipes/${savedRecipe.id}`);
+                    }, 1500);
+                }
+
+            } catch (error) {
+                console.error("Erreur lors de la sauvegarde:", error);
+                setSaveStatus("error");
+
+                // Afficher l'erreur spécifique si possible
+                const errorMessage = error instanceof Error
+                    ? error.message
+                    : "Erreur lors de la sauvegarde. Veuillez réessayer.";
+
+                setErrors({ general: errorMessage });
             }
-
-            const url = isCreating
-                ? "/api/recipes"
-                : `/api/recipes/${recipeId}`;
-
-            const method = isCreating ? "POST" : "PUT";
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(recipeData)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Erreur lors de la sauvegarde");
-            }
-
-            const savedRecipe = await response.json();
-
-            setSaveStatus("saved");
-            setHasUnsavedChanges(false);
-
-            // Redirection après création
-            if (isCreating) {
-                setTimeout(() => {
-                    router.push(`/recipes/${savedRecipe.id}`);
-                }, 1000);
-            }
-
-        } catch (error) {
-            console.error("Erreur lors de la sauvegarde:", error);
-            setSaveStatus("error");
-            setErrors({ general: "Erreur lors de la sauvegarde. Veuillez réessayer." });
-        } finally {
-            setSaving(false);
-        }
+        });
     };
 
-    // Fonction d'annulation
+    // Fonction d'annulation avec confirmation
     const handleCancel = () => {
         if (hasUnsavedChanges) {
             const confirmed = window.confirm(
@@ -193,8 +242,10 @@ export default function RecipeEditForm({
 
         if (isCreating) {
             router.push("/recipes");
-        } else {
+        } else if (recipeId) {
             router.push(`/recipes/${recipeId}`);
+        } else {
+            router.push("/recipes");
         }
     };
 
@@ -203,7 +254,7 @@ export default function RecipeEditForm({
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             if (hasUnsavedChanges) {
                 e.preventDefault();
-                e.returnValue = "";
+                e.returnValue = "Vous avez des modifications non sauvegardées.";
             }
         };
 
@@ -211,42 +262,63 @@ export default function RecipeEditForm({
         return () => window.removeEventListener("beforeunload", handleBeforeUnload);
     }, [hasUnsavedChanges]);
 
+    // Auto-save draft (fonctionnalité bonus)
+    useEffect(() => {
+        if (hasUnsavedChanges && isCreating) {
+            const timeoutId = setTimeout(() => {
+                // Sauvegarder en localStorage comme brouillon
+                localStorage.setItem('recipe-draft', JSON.stringify(formData));
+            }, 2000);
+
+            return () => clearTimeout(timeoutId);
+        }
+    }, [formData, hasUnsavedChanges, isCreating]);
+
     return (
         <div className="space-y-8">
-
-            {/* Barre d'actions fixe */}
-            <Card className="sticky top-2 z-40 p-4 -mx-4">
-                <CardBody>
+            {/* Barre d'actions sticky avec indicateurs de statut */}
+            <Card className="sticky top-4 z-40 shadow-lg">
+                <CardBody className="p-4">
                     <div className="flex items-center justify-between">
 
-                        {/* Statut de sauvegarde */}
-                        <div className="flex items-center gap-2">
+                        {/* Statut de sauvegarde avec chips colorés */}
+                        <div className="flex items-center gap-3">
                             {saveStatus === "saving" && (
-                                <div className="flex items-center gap-2 text-blue-600">
-                                    <div
-                                        className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                                    <span className="text-sm">Sauvegarde en cours...</span>
-                                </div>
+                                <Chip
+                                    color="primary"
+                                    variant="flat"
+                                    startContent={
+                                        <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin" />
+                                    }
+                                >
+                                    Sauvegarde en cours...
+                                </Chip>
                             )}
 
                             {saveStatus === "saved" && (
-                                <div className="flex items-center gap-2 text-green-600">
-                                    <CheckCircle2 className="w-4 h-4" />
-                                    <span className="text-sm">Sauvegardé !</span>
-                                </div>
+                                <Chip
+                                    color="success"
+                                    variant="flat"
+                                    startContent={<CheckCircle2 className="w-3 h-3" />}
+                                >
+                                    Sauvegardé !
+                                </Chip>
                             )}
 
                             {saveStatus === "error" && (
-                                <div className="flex items-center gap-2 text-red-600">
-                                    <AlertCircle className="w-4 h-4" />
-                                    <span className="text-sm">Erreur de sauvegarde</span>
-                                </div>
+                                <Chip
+                                    color="danger"
+                                    variant="flat"
+                                    startContent={<AlertCircle className="w-3 h-3" />}
+                                >
+                                    Erreur de sauvegarde
+                                </Chip>
                             )}
 
                             {hasUnsavedChanges && saveStatus === "idle" && (
-                                <span className="text-sm text-orange-600">
+                                <Chip color="warning" variant="flat">
                                     Modifications non sauvegardées
-                                </span>
+                                </Chip>
                             )}
                         </div>
 
@@ -254,27 +326,37 @@ export default function RecipeEditForm({
                         <div className="flex items-center gap-3">
                             <Button
                                 onPress={handleCancel}
-                                color={"secondary"}
+                                color="default"
+                                variant="bordered"
                                 startContent={<X className="w-4 h-4" />}
+                                isDisabled={isPending}
                             >
                                 Annuler
                             </Button>
 
                             <Button
                                 onPress={handleSave}
-                                disabled={loading}
-                                color={"primary"}
-                                startContent={<Save className="w-4 h-4" />}
+                                color="primary"
+                                isLoading={isPending}
+                                startContent={!isPending && <Save className="w-4 h-4" />}
                             >
-                                {loading ? "Sauvegarde..." : isCreating ? "Créer" : "Sauvegarder"}
+                                {isPending
+                                    ? "Sauvegarde..."
+                                    : isCreating
+                                        ? "Créer la recette"
+                                        : "Sauvegarder"
+                                }
                             </Button>
                         </div>
                     </div>
 
                     {/* Erreurs générales */}
                     {errors.general && (
-                        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                            <p className="text-red-700 text-sm">{errors.general}</p>
+                        <div className="mt-4">
+                            <Chip color="danger" variant="bordered" className="w-full justify-start">
+                                <AlertCircle className="w-4 h-4 mr-2" />
+                                {errors.general}
+                            </Chip>
                         </div>
                     )}
                 </CardBody>
@@ -319,31 +401,71 @@ export default function RecipeEditForm({
                         onChange={(image) => updateFormData({ image })}
                     />
 
-                    {/* Résumé de la recette */}
-                    <Card className="p-6">
-                        <h3 className="font-semibold mb-4">Résumé</h3>
-                        <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Ingrédients:</span>
-                                <span className="font-medium">{formData.ingredients.length}</span>
+                    {/* Résumé de la recette amélioré */}
+                    <Card>
+                        <CardBody className="p-6">
+                            <h3 className="font-semibold mb-4 text-lg">Résumé</h3>
+                            <div className="space-y-3">
+
+                                <div className="flex justify-between items-center">
+                                    <span className="text-default-600">Ingrédients:</span>
+                                    <Chip size="sm" color="success" variant="flat">
+                                        {formData.ingredients.length}
+                                    </Chip>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                    <span className="text-default-600">Étapes:</span>
+                                    <Chip size="sm" color="primary" variant="flat">
+                                        {formData.steps.filter(step => step.trim()).length}
+                                    </Chip>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                    <span className="text-default-600">Temps total:</span>
+                                    <Chip size="sm" color="secondary" variant="flat">
+                                        {formData.prep_time + formData.cook_time} min
+                                    </Chip>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                    <span className="text-default-600">Portions:</span>
+                                    <Chip size="sm" color="warning" variant="flat">
+                                        {formData.servings}
+                                    </Chip>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                    <span className="text-default-600">Tags:</span>
+                                    <Chip size="sm" color="default" variant="flat">
+                                        {formData.tags.length}/8
+                                    </Chip>
+                                </div>
+
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Étapes:</span>
-                                <span className="font-medium">
-                  {formData.steps.filter(step => step.trim()).length}
-                </span>
+                        </CardBody>
+                    </Card>
+
+                    {/* Indicateur de progression */}
+                    <Card>
+                        <CardBody className="p-6">
+                            <h3 className="font-semibold mb-4">Progression</h3>
+                            <div className="space-y-2">
+                                {[
+                                    { label: "Informations de base", completed: !!(formData.name && formData.creator) },
+                                    { label: "Ingrédients", completed: formData.ingredients.length > 0 },
+                                    { label: "Étapes", completed: formData.steps.some(step => step.trim()) },
+                                    { label: "Photo", completed: !!formData.image },
+                                ].map((item, index) => (
+                                    <div key={index} className="flex items-center gap-2">
+                                        <div className={`w-2 h-2 rounded-full ${item.completed ? 'bg-success' : 'bg-default-300'}`} />
+                                        <span className={`text-sm ${item.completed ? 'text-success' : 'text-default-500'}`}>
+                      {item.label}
+                    </span>
+                                    </div>
+                                ))}
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Temps total:</span>
-                                <span className="font-medium">
-                  {formData.prep_time + formData.cook_time} min
-                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600">Portions:</span>
-                                <span className="font-medium">{formData.servings}</span>
-                            </div>
-                        </div>
+                        </CardBody>
                     </Card>
                 </div>
             </div>

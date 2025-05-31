@@ -141,12 +141,13 @@ export default function RecipeBasicInfo({
                                 label="Préparation (min)"
                                 id="prep_time"
                                 value={data.prep_time.toString() || ""}
-                                onChange={(e) => onChange({ prep_time: parseInt(e.target.value) || 0 })}
-                                min="0"
+                                onChange={(e) => onChange({ prep_time: parseInt(e.target.value) || 1 })}
+                                min="1"
                                 max="999"
-                                placeholder="0"
+                                placeholder="1"
                                 isInvalid={!!errors.prep_time}
                                 errorMessage={errors.prep_time}
+                                description="Doit être supérieur à 0"
                             />
                         </div>
 

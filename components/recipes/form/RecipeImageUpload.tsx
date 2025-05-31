@@ -3,13 +3,25 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { Upload, X, Image as ImageIcon, Loader2, AlertCircle } from 'lucide-react';
-import Image from 'next/image';
+import NextImage from 'next/image'; // ✅ Import renommé pour éviter les conflits
 import { Card } from "@heroui/card";
 
 interface RecipeImageUploadProps {
     currentImage?: string;
     recipeName: string;
     onChange: (imageUrl: string) => void;
+}
+
+// ✅ Types pour une meilleure robustesse
+interface ImageDimensions {
+    width: number;
+    height: number;
+}
+
+interface ResizeOptions {
+    maxWidth: number;
+    maxHeight: number;
+    quality: number;
 }
 
 export default function RecipeImageUpload({
@@ -24,9 +36,19 @@ export default function RecipeImageUpload({
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Fonction pour valider le fichier
+    // ✅ Configuration centralisée
+    const UPLOAD_CONFIG = {
+        maxSize: 10 * 1024 * 1024, // 10MB
+        allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+        resizeOptions: {
+            maxWidth: 1200,
+            maxHeight: 800,
+            quality: 0.8
+        } as ResizeOptions
+    } as const;
+
+    // ✅ Validation avec messages d'erreur plus précis
     const validateFile = (file: File): string | null => {
-        // Vérifier le type de fichier
         if (!file.type.startsWith('image/')) {
             return 'Le fichier doit être une image';
         }
@@ -37,85 +59,149 @@ export default function RecipeImageUpload({
             return 'Format accepté : JPEG, PNG ou WebP';
         }
 
-        // Vérifier la taille (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-            return 'L\'image doit faire moins de 10MB';
+        if (file.size > UPLOAD_CONFIG.maxSize) {
+            const maxSizeMB = UPLOAD_CONFIG.maxSize / (1024 * 1024);
+            return `L'image doit faire moins de ${maxSizeMB}MB (taille actuelle: ${(file.size / (1024 * 1024)).toFixed(1)}MB)`;
         }
 
         return null;
     };
 
-    // Fonction pour redimensionner une image
-    const resizeImage = (file: File, maxWidth: number = 1200, maxHeight: number = 800, quality: number = 0.8): Promise<File> => {
-        return new Promise((resolve) => {
+    // ✅ Fonction utilitaire pour calculer les dimensions
+    const calculateNewDimensions = (
+        original: ImageDimensions,
+        max: Pick<ResizeOptions, 'maxWidth' | 'maxHeight'>
+    ): ImageDimensions => {
+        let { width, height } = original;
+        const { maxWidth, maxHeight } = max;
+
+        // Garde le ratio d'aspect
+        if (width > height) {
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+        } else {
+            if (height > maxHeight) {
+                width = (width * maxHeight) / height;
+                height = maxHeight;
+            }
+        }
+
+        return { width, height };
+    };
+
+    // ✅ Fonction de redimensionnement robuste avec gestion d'erreur complète
+    const resizeImage = (file: File, options: ResizeOptions = UPLOAD_CONFIG.resizeOptions): Promise<File> => {
+        return new Promise((resolve, reject) => {
             const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d')!;
-            const img = new Image();
+            const ctx = canvas.getContext('2d');
+
+            if (!ctx) {
+                reject(new Error('Impossible de créer le contexte canvas'));
+                return;
+            }
+
+            const img = new HTMLImageElement(); // ✅ Explicite et sans conflit
+            let objectUrl: string | null = null;
+
+            // ✅ Nettoyage automatique des ressources
+            const cleanup = () => {
+                if (objectUrl) {
+                    URL.revokeObjectURL(objectUrl);
+                    objectUrl = null;
+                }
+            };
 
             img.onload = () => {
-                // Calculer les nouvelles dimensions en gardant le ratio
-                let { width, height } = img;
+                try {
+                    // Calculer les nouvelles dimensions
+                    const newDimensions = calculateNewDimensions(
+                        { width: img.naturalWidth, height: img.naturalHeight },
+                        { maxWidth: options.maxWidth, maxHeight: options.maxHeight }
+                    );
 
-                if (width > height) {
-                    if (width > maxWidth) {
-                        height = (height * maxWidth) / width;
-                        width = maxWidth;
-                    }
-                } else {
-                    if (height > maxHeight) {
-                        width = (width * maxHeight) / height;
-                        height = maxHeight;
-                    }
-                }
+                    canvas.width = newDimensions.width;
+                    canvas.height = newDimensions.height;
 
-                canvas.width = width;
-                canvas.height = height;
+                    // Dessiner l'image redimensionnée
+                    ctx.drawImage(img, 0, 0, newDimensions.width, newDimensions.height);
 
-                // Dessiner l'image redimensionnée
-                ctx.drawImage(img, 0, 0, width, height);
+                    // Convertir en blob avec gestion d'erreur
+                    canvas.toBlob(
+                        (blob) => {
+                            cleanup();
 
-                // Convertir en blob
-                canvas.toBlob(
-                    (blob) => {
-                        if (blob) {
+                            if (!blob) {
+                                reject(new Error('Impossible de redimensionner l\'image'));
+                                return;
+                            }
+
                             const resizedFile = new File([blob], file.name, {
                                 type: file.type,
                                 lastModified: Date.now()
                             });
+
                             resolve(resizedFile);
-                        } else {
-                            resolve(file); // Fallback sur le fichier original
-                        }
-                    },
-                    file.type,
-                    quality
-                );
+                        },
+                        file.type,
+                        options.quality
+                    );
+                } catch (error) {
+                    cleanup();
+                    reject(new Error('Erreur lors du redimensionnement'));
+                }
             };
 
-            img.src = URL.createObjectURL(file);
+            img.onerror = () => {
+                cleanup();
+                reject(new Error('Impossible de charger l\'image pour le redimensionnement'));
+            };
+
+            // ✅ Créer l'URL et la nettoyer automatiquement
+            objectUrl = URL.createObjectURL(file);
+            img.src = objectUrl;
         });
     };
 
-    // Fonction d'upload vers le serveur
-    const uploadFile = async (file: File): Promise<string> => {
+    // ✅ Upload avec retry logic et meilleure gestion d'erreur
+    const uploadFile = async (file: File, retries: number = 2): Promise<string> => {
         const formData = new FormData();
         formData.append('image', file);
         formData.append('recipeName', recipeName);
 
-        const response = await fetch('/api/upload/recipe-image', {
-            method: 'POST',
-            body: formData,
-        });
+        for (let attempt = 0; attempt <= retries; attempt++) {
+            try {
+                const response = await fetch('/api/upload/recipe-image', {
+                    method: 'POST',
+                    body: formData,
+                });
 
-        if (!response.ok) {
-            throw new Error('Erreur lors de l\'upload');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || `Erreur HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.imageUrl) {
+                    throw new Error('URL d\'image manquante dans la réponse');
+                }
+
+                return data.imageUrl;
+            } catch (error) {
+                if (attempt === retries) {
+                    throw error; // Dernière tentative échouée
+                }
+                // Attendre avant de retry
+                await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+            }
         }
 
-        const data = await response.json();
-        return data.imageUrl;
+        throw new Error('Échec après plusieurs tentatives');
     };
 
-    // Fonction principale de traitement du fichier
+    // ✅ Fonction principale avec meilleure gestion des états
     const handleFile = useCallback(async (file: File) => {
         setError(null);
 
@@ -127,11 +213,12 @@ export default function RecipeImageUpload({
         }
 
         setUploading(true);
+        let tempPreviewUrl: string | null = null;
 
         try {
             // Prévisualisation immédiate
-            const previewUrl = URL.createObjectURL(file);
-            setPreviewUrl(previewUrl);
+            tempPreviewUrl = URL.createObjectURL(file);
+            setPreviewUrl(tempPreviewUrl);
 
             // Redimensionnement si nécessaire
             const resizedFile = await resizeImage(file);
@@ -139,26 +226,41 @@ export default function RecipeImageUpload({
             // Upload vers le serveur
             const imageUrl = await uploadFile(resizedFile);
 
-            // Mettre à jour la recette
+            // Succès : mettre à jour avec l'URL finale
             onChange(imageUrl);
 
-            // Nettoyer l'URL de prévisualisation
-            URL.revokeObjectURL(previewUrl);
+            // Nettoyer l'URL temporaire et utiliser l'URL finale
+            if (tempPreviewUrl) {
+                URL.revokeObjectURL(tempPreviewUrl);
+                tempPreviewUrl = null;
+            }
             setPreviewUrl(imageUrl);
 
         } catch (error) {
             console.error('Erreur lors de l\'upload:', error);
-            setError('Erreur lors de l\'upload de l\'image');
-            setPreviewUrl(null);
+
+            // Nettoyer en cas d'erreur
+            if (tempPreviewUrl) {
+                URL.revokeObjectURL(tempPreviewUrl);
+            }
+            setPreviewUrl(currentImage || null);
+
+            // Message d'erreur adapté
+            if (error instanceof Error) {
+                setError(error.message);
+            } else {
+                setError('Erreur inattendue lors de l\'upload');
+            }
         } finally {
             setUploading(false);
         }
-    }, [recipeName, onChange]);
+    }, [recipeName, onChange, currentImage]);
 
-    // Gestion du drag & drop
+    // ✅ Gestion du drag & drop optimisée
     const handleDrag = useCallback((e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
+
         if (e.type === 'dragenter' || e.type === 'dragover') {
             setDragActive(true);
         } else if (e.type === 'dragleave') {
@@ -171,21 +273,23 @@ export default function RecipeImageUpload({
         e.stopPropagation();
         setDragActive(false);
 
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            handleFile(e.dataTransfer.files[0]);
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
         }
     }, [handleFile]);
 
-    // Gestion du clic sur input file
+    // ✅ Gestion du clic sur input file
     const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            handleFile(e.target.files[0]);
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            handleFile(files[0]);
         }
     };
 
-    // Supprimer l'image
-    const removeImage = () => {
-        if (previewUrl) {
+    // ✅ Supprimer l'image avec nettoyage complet
+    const removeImage = useCallback(() => {
+        if (previewUrl && previewUrl.startsWith('blob:')) {
             URL.revokeObjectURL(previewUrl);
         }
         setPreviewUrl(null);
@@ -196,7 +300,7 @@ export default function RecipeImageUpload({
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
-    };
+    }, [previewUrl, onChange]);
 
     return (
         <Card className="p-6">
@@ -221,10 +325,11 @@ export default function RecipeImageUpload({
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept={UPLOAD_CONFIG.allowedTypes.join(',')}
                         onChange={handleFileInput}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         disabled={uploading}
+                        aria-label="Sélectionner une image"
                     />
 
                     {uploading ? (
@@ -240,7 +345,7 @@ export default function RecipeImageUpload({
                                 <span className="text-blue-600 font-medium">clique pour choisir</span>
                             </p>
                             <p className="text-xs text-gray-500">
-                                JPEG, PNG ou WebP • Max 10MB
+                                JPEG, PNG ou WebP • Max {UPLOAD_CONFIG.maxSize / (1024 * 1024)}MB
                             </p>
                         </div>
                     )}
@@ -249,7 +354,7 @@ export default function RecipeImageUpload({
                 /* Prévisualisation de l'image */
                 <div className="relative">
                     <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
-                        <Image
+                        <NextImage
                             src={previewUrl}
                             alt={`Photo de ${recipeName}`}
                             fill
@@ -270,7 +375,8 @@ export default function RecipeImageUpload({
                         <button
                             onClick={() => fileInputRef.current?.click()}
                             disabled={uploading}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50"
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50 transition-colors"
+                            aria-label="Changer l'image"
                         >
                             <Upload className="w-4 h-4" />
                             Changer l'image
@@ -279,7 +385,8 @@ export default function RecipeImageUpload({
                         <button
                             onClick={removeImage}
                             disabled={uploading}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 disabled:opacity-50 transition-colors"
+                            aria-label="Supprimer l'image"
                         >
                             <X className="w-4 h-4" />
                             Supprimer
@@ -290,17 +397,18 @@ export default function RecipeImageUpload({
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept={UPLOAD_CONFIG.allowedTypes.join(',')}
                         onChange={handleFileInput}
                         className="hidden"
                         disabled={uploading}
+                        aria-label="Changer l'image"
                     />
                 </div>
             )}
 
             {/* Erreurs */}
             {error && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2" role="alert">
                     <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                     <p className="text-red-700 text-sm">{error}</p>
                 </div>

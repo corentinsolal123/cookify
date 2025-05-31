@@ -1,6 +1,6 @@
 // lib/services/shoppingListService.ts
 import { ShoppingListData, ShoppingListItemData } from "@/types/shoppingList";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
 
 export class ShoppingListService {
     // Récupérer toutes les listes de l'utilisateur

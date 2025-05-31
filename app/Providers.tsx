@@ -5,6 +5,7 @@ import { HeroUIProvider } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
+import QueryProvider from "@/lib/providers/QueryProvider";
 
 export interface ProvidersProps {
     children: React.ReactNode;
@@ -18,7 +19,9 @@ export function Providers({ children, themeProps }: Readonly<ProvidersProps>) {
         <HeroUIProvider navigate={router.push} locale={"fr-FR"}>
             <NextThemesProvider {...themeProps}>
                 <AuthProvider>
-                    {children}
+                    <QueryProvider>
+                        {children}
+                    </QueryProvider>
                 </AuthProvider>
             </NextThemesProvider>
         </HeroUIProvider>
