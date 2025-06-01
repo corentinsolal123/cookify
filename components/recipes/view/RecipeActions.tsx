@@ -4,6 +4,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bookmark, Check, Copy, Download, Edit, Heart, Printer, Share2 } from "lucide-react";
+import { Card, CardBody } from "@heroui/card";
+import { Button } from "@heroui/button";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 
 interface RecipeActionsProps {
     recipeId: string;
@@ -119,70 +122,56 @@ export default function RecipeActions({ recipeId, recipeName }: Readonly<RecipeA
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
+        <Card className="p-6">
+            <CardBody className="flex flex-row flex-wrap items-center justify-between">
 
                 {/* Actions principales */}
                 <div className="flex items-center gap-2">
 
                     {/* Bouton d'édition */}
-                    <button
-                        onClick={goToEdit}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-                    >
-                        <Edit className="w-4 h-4" />
+                    <Button
+                        startContent={<Edit className="w-4 h-4" />}
+                        onPress={goToEdit}
+                        color={"primary"}>
                         Modifier
-                    </button>
+                    </Button>
 
                     {/* Bouton favoris */}
-                    <button
-                        onClick={toggleFavorite}
-                        className={`p-2 rounded-lg border-2 transition-all ${
-                            isFavorite
-                                ? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
-                                : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
-                        }`}
-                        title={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+                    <Button
+                        onPress={toggleFavorite}
+                        isIconOnly
+                        aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
                     >
                         <Heart className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`} />
-                    </button>
+                    </Button>
 
                     {/* Bouton sauvegarde */}
-                    <button
-                        onClick={toggleSave}
-                        className={`p-2 rounded-lg border-2 transition-all ${
-                            isSaved
-                                ? "bg-green-50 border-green-200 text-green-600 hover:bg-green-100"
-                                : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
-                        }`}
-                        title={isSaved ? "Retirer de mes collections" : "Sauvegarder"}
+                    <Button
+                        onPress={toggleSave}
+                        isIconOnly
+                        aria-label={isSaved ? "Retirer de mes collections" : "Sauvegarder"}
                     >
                         <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Actions secondaires */}
                 <div className="flex items-center gap-2">
 
                     {/* Bouton de partage */}
-                    <button
-                        onClick={shareRecipe}
+                    <Button
+                        onPress={shareRecipe}
                         disabled={shareLoading}
-                        className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50"
                         title="Partager cette recette"
+                        startContent={<Share2 className="w-4 h-4" />}
                     >
-                        <Share2 className="w-4 h-4" />
                         <span className="hidden sm:inline">Partager</span>
-                    </button>
+                    </Button>
 
                     {/* Bouton de copie de lien */}
-                    <button
-                        onClick={copyLink}
-                        className={`p-2 rounded-lg transition-all ${
-                            copied
-                                ? "bg-green-100 text-green-600"
-                                : "bg-gray-100 hover:bg-gray-200 text-gray-600"
-                        }`}
+                    <Button
+                        onPress={copyLink}
+                        isIconOnly
                         title="Copier le lien"
                     >
                         {copied ? (
@@ -190,43 +179,32 @@ export default function RecipeActions({ recipeId, recipeName }: Readonly<RecipeA
                         ) : (
                             <Copy className="w-4 h-4" />
                         )}
-                    </button>
+                    </Button>
 
-                    {/* Menu déroulant pour les autres actions */}
-                    <div className="relative group">
-                        <button
-                            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">
-                            <span className="sr-only">Plus d'options</span>
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                            </svg>
-                        </button>
-
-                        {/* Menu déroulant */}
-                        <div
-                            className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                            <div className="py-1">
-                                <button
-                                    onClick={printRecipe}
-                                    className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                    <Printer className="w-4 h-4" />
-                                    Imprimer
-                                </button>
-
-                                <button
-                                    onClick={exportToPDF}
-                                    className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                    <Download className="w-4 h-4" />
-                                    Exporter en PDF
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <Dropdown>
+                        <DropdownTrigger>
+                            <Button isIconOnly>
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                                </svg>
+                            </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu>
+                            <DropdownItem key="print" onPress={printRecipe}>
+                                <span className="flex gap-2.5 items-center">
+                                    <Printer className="w-4 h-4" />Imprimer
+                                </span>
+                            </DropdownItem>
+                            <DropdownItem key="pdf" onPress={exportToPDF}>
+                                <span className="flex gap-2.5 items-center">
+                                    <Download className="w-4 h-4" />Exporter en PDF
+                                </span>
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
                 </div>
-            </div>
+            </CardBody>
 
             {/* Indication de copie */}
             {copied && (
@@ -234,6 +212,6 @@ export default function RecipeActions({ recipeId, recipeName }: Readonly<RecipeA
                     Lien copié dans le presse-papiers !
                 </div>
             )}
-        </div>
+        </Card>
     );
 }

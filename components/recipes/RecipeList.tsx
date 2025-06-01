@@ -37,7 +37,7 @@ export default function RecipeList({ recipes }: Readonly<RecipeListProps>) {
                         </p>
                         <Button
                             as={NextLink}
-                            href="/recipes/create"
+                            href="/recipes/new"
                             color="primary"
                             size="lg"
                             className="font-semibold px-8"

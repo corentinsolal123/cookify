@@ -4,6 +4,8 @@
 import { useState, useEffect } from "react";
 import { Activity, Loader2, RefreshCw } from "lucide-react";
 import { IngredientData } from "@/types/ingredient";
+import { Card } from "@heroui/card";
+import { Button } from "@heroui/button";
 
 interface NutritionData {
     calories: number;
@@ -85,21 +87,22 @@ export default function RecipeNutrition({ ingredients, servings, totalCalories }
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <Card className="p-6">
 
             {/* En-tête */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                     <Activity className="w-5 h-5 text-green-500" />
-                    <h2 className="text-xl font-semibold text-gray-900">
+                    <h2 className="text-xl font-semibold">
                         Informations nutritionnelles
                     </h2>
                 </div>
 
-                <button
-                    onClick={fetchNutritionData}
+                <Button
+                    isIconOnly
+                    onPress={fetchNutritionData}
                     disabled={loading}
-                    className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                    className="disabled:opacity-50"
                     aria-label="Actualiser les données nutritionnelles"
                 >
                     {loading ? (
@@ -107,7 +110,7 @@ export default function RecipeNutrition({ ingredients, servings, totalCalories }
                     ) : (
                         <RefreshCw className="w-4 h-4" />
                     )}
-                </button>
+                </Button>
             </div>
 
             {/* États de chargement/erreur */}
@@ -115,8 +118,8 @@ export default function RecipeNutrition({ ingredients, servings, totalCalories }
                 <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
                     <span className="ml-2 text-gray-600">
-            Analyse nutritionnelle en cours...
-          </span>
+                        Analyse nutritionnelle en cours...
+                      </span>
                 </div>
             )}
 
@@ -141,8 +144,8 @@ export default function RecipeNutrition({ ingredients, servings, totalCalories }
                         <div className="flex justify-between items-center">
                             <span className="font-medium text-gray-900">Calories par portion</span>
                             <span className="text-2xl font-bold text-blue-600">
-                {Math.round(nutritionData.calories / servings)}
-              </span>
+                                {Math.round(nutritionData.calories / servings)}
+                            </span>
                         </div>
                         <div className="mt-1 text-sm text-gray-600">
                             Total: {Math.round(nutritionData.calories)} cal
@@ -233,6 +236,6 @@ export default function RecipeNutrition({ ingredients, servings, totalCalories }
                     </div>
                 </div>
             )}
-        </div>
+        </Card>
     );
 }

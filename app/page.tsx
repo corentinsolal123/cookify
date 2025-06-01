@@ -42,7 +42,7 @@ export default async function Home() {
                         </Button>
                         <Button
                             as={NextLink}
-                            href="/register"
+                            href="/auth/signup"
                             color="secondary"
                             variant="flat"
                             size="lg"
@@ -82,7 +82,7 @@ export default async function Home() {
                                 <Image
                                     alt="Recette en vedette"
                                     className="object-cover w-full aspect-video rounded-xl"
-                                    src="https://placehold.co/600x400"
+                                    src="https://placehold.co/400x400"
                                 />
                             </div>
                             <h5 className="font-bold text-lg text-gray-900 dark:text-white">ui</h5>
@@ -94,7 +94,7 @@ export default async function Home() {
                         <CardFooter className="px-6 py-4">
                             <Button
                                 as={NextLink}
-                                href={"/recipe/"}
+                                href="/recipes"
                                 color="primary"
                                 variant="flat"
                                 className="w-full"
@@ -176,7 +176,7 @@ export default async function Home() {
             <div className="mt-16 text-center">
                 <Button
                     as={NextLink}
-                    href="/register"
+                    href="/auth/signup"
                     color="primary"
                     size="lg"
                     className="font-medium"

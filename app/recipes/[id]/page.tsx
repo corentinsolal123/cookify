@@ -92,9 +92,9 @@ export async function generateMetadata({
 // Composant principal de la page
 export default async function RecipeViewPage({
                                                  params
-                                             }: PageProps) {
+                                             }: Readonly<PageProps>) {
 
-    const { id } = await params; // ✅ await obligatoire
+    const { id } = await params;
 
     // Récupération des données côté serveur (SSG)
     const recipe = await getRecipe(id);
@@ -107,8 +107,8 @@ export default async function RecipeViewPage({
     const totalTime = recipe.prep_time + recipe.cook_time;
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="">
+            <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
 
                 {/* En-tête avec image et infos principales */}
                 <RecipeHeader
@@ -118,7 +118,7 @@ export default async function RecipeViewPage({
 
                 {/* Actions rapides (modifier, partager, etc.) */}
                 <RecipeActions
-                    recipeId={recipe.id!}
+                    recipeId={recipe.id}
                     recipeName={recipe.name}
                 />
 
