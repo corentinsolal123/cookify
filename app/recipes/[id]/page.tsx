@@ -63,13 +63,10 @@ export async function generateMetadata({
 
 
 // Composant principal de la page
-export default async function RecipeViewPage({
-                                                 params
-                                             }: Readonly<PageProps>) {
+export default async function RecipeViewPage({ params }: Readonly<PageProps>) {
 
     const { id } = await params;
 
-    // Récupération des données côté serveur (SSG)
     const recipe = await getRecipeById(id);
 
     if (!recipe) {

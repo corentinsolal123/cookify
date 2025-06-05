@@ -51,7 +51,7 @@ export default function RecipeHeader({ recipe, totalTime }: Readonly<RecipeHeade
             </div>
 
             {/* Informations principales */}
-            <CardFooter className="p-6 justify-between before:bg-white/10 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
+            <CardFooter className="p-6 justify-between items-baseline before:bg-white/10 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
                     {recipe.name}
                 </h1>
