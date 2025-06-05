@@ -50,6 +50,16 @@ export const NavLinks = ({ isMobile = false }: NavLinksProps) => {
                     </NextLink>
                 </NavbarItem>
             ))}
+            <NavbarItem>
+                <NextLink href={"/auth/login"}>
+                    Login
+                </NextLink>
+            </NavbarItem>
+            <NavbarItem>
+                <NextLink href={"/auth/signup"}>
+                    Signup
+                </NextLink>
+            </NavbarItem>
         </ul>
     );
 };
