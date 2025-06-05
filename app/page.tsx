@@ -3,10 +3,9 @@ import { Button } from "@heroui/button";
 import { Image } from "@heroui/image";
 import { Divider } from "@heroui/divider";
 import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
+import { Link } from "@heroui/link";
 
 export default async function Home() {
-    // const stats = await getStats();
-    // const featuredRecipe = await getFeaturedRecipe();
 
     return (
         <div className="container-custom py-12">
@@ -24,7 +23,7 @@ export default async function Home() {
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4">
                         <Button
-                            as={NextLink}
+                            as={Link}
                             href="/recipes"
                             color="primary"
                             size="lg"
@@ -41,7 +40,7 @@ export default async function Home() {
                             Explorer les recettes
                         </Button>
                         <Button
-                            as={NextLink}
+                            as={Link}
                             href="/auth/signup"
                             color="secondary"
                             variant="flat"
