@@ -9,14 +9,12 @@ import RecipeActions from "@/components/recipes/view/RecipeActions";
 import { getRecipeById } from "@/lib/services/client/recipeServices";
 
 interface PageProps {
-    params: Promise<{ id: string }>; // Promise maintenant !
+    params: { id: string };
 }
 
 // Génération des métadonnées pour le SEO (SSG)
-export async function generateMetadata({
-                                           params
-                                       }: PageProps): Promise<Metadata> { // ✅ Type corrigé pour utiliser PageProps
-    const { id } = await params;
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const { id } = params;
     const recipe = await getRecipeById(id);
 
     if (!recipe) {
@@ -65,7 +63,7 @@ export async function generateMetadata({
 // Composant principal de la page
 export default async function RecipeViewPage({ params }: Readonly<PageProps>) {
 
-    const { id } = await params;
+    const { id } = params;
 
     const recipe = await getRecipeById(id);
 
